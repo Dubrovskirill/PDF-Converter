@@ -13,6 +13,7 @@ SOURCES += \
     main.cpp \
 
 HEADERS += \
+    src/core/IPdfProcessor.h
 
 RESOURCES += qml.qrc
 
