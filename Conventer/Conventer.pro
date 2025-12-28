@@ -52,7 +52,8 @@ HEADERS += \
     src/core/interfaces/IImageConverter.h \
     src/core/interfaces/IPdfEditor.h \
     src/core/interfaces/IPdfMerger.h \
-    src/core/interfaces/IPdfRenderer.h
+    src/core/interfaces/IPdfRenderer.h \
+    src/infrastructure/TaskSignals.h
 
 RESOURCES += qml.qrc
 QML_IMPORT_PATH = src/gui
