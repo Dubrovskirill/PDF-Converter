@@ -13,7 +13,6 @@ Item {
         anchors.margins: 20
         spacing: 20
 
-        // Верхняя панель управления
         RowLayout {
             Layout.fillWidth: true
             Button {
@@ -28,7 +27,7 @@ Item {
                 Layout.leftMargin: 10
             }
 
-            Item { Layout.fillWidth: true } // Распорка, чтобы кнопка "Добавить" ушла вправо
+            Item { Layout.fillWidth: true }
 
             Button {
                 text: "+ Добавить файлы"
@@ -66,7 +65,10 @@ Item {
                 }
             }
 
-            // Добавим полосу прокрутки
+            DropZone {
+                    anchors.fill: parent
+                }
+
             ScrollBar.vertical: ScrollBar {
                 policy: ScrollBar.AsNeeded
             }

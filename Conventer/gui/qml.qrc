@@ -4,5 +4,6 @@
         <file>views/MainMenu.qml</file>
         <file>views/ServicePage.qml</file>
         <file>components/FileCard.qml</file>
+        <file>components/DropZone.qml</file>
     </qresource>
 </RCC>

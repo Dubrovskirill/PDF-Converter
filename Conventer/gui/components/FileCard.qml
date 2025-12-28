@@ -26,7 +26,6 @@ Rectangle {
         anchors.margins: 8
         spacing: 5
 
-        // 1. БОЛЬШОЕ ПРЕВЬЮ
         Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
@@ -37,12 +36,11 @@ Rectangle {
             Image {
                 anchors.fill: parent
                 source: previewSource
-                fillMode: Image.PreserveAspectCrop // Заполняем область
+                fillMode: Image.PreserveAspectCrop
                 visible: previewSource !== ""
                 asynchronous: true
             }
 
-            // Заглушка-иконка
             Text {
                 anchors.centerIn: parent
                 text: "📄"
@@ -51,7 +49,6 @@ Rectangle {
                 visible: previewSource === ""
             }
 
-            // Кнопка удаления (появляется только при наведении)
             Button {
                 anchors.top: parent.top
                 anchors.right: parent.right
@@ -79,7 +76,6 @@ Rectangle {
             }
         }
 
-        // 2. ПОДПИСЬ
         Text {
             Layout.fillWidth: true
             text: fileName
