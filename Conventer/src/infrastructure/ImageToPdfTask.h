@@ -1,0 +1,4 @@
+#ifndef IMAGETOPDFTASK_H
+#define IMAGETOPDFTASK_H
+
+#endif // IMAGETOPDFTASK_H

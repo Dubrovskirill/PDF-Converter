@@ -69,5 +69,5 @@ private:
     QString m_baseOutputPath = "D:/c++ everything/PDF-Converter/test_output/render_results/";
 };
 
-QTEST_MAIN(TestPdfRenderer)
-#include "TestPdfRenderer.moc"
+//QTEST_MAIN(TestPdfRenderer)
+//#include "TestPdfRenderer.moc"

@@ -3,7 +3,8 @@ CONFIG += c++17
 
 # Настройки путей проекта
 INCLUDEPATH += src/core \
-               src/viewmodel
+               src/viewmodel \
+               src/infrastructure
 
 # --- БИБЛИОТЕКА QPDF ---
 QPDF_DIR = $$PWD/3rdparty/qpdf
@@ -41,6 +42,7 @@ QMAKE_EXTRA_TARGETS += first copy_dlls
 
 # --- ФАЙЛЫ ПРОЕКТА ---
 SOURCES += \
+    src/test/TestAsyncTasks.cpp \
     src/test/TestPdfRenderer.cpp \
     src/test/TestQPdfMerger.cpp \
     src/test/TestQtImageConverter.cpp
@@ -54,6 +56,9 @@ HEADERS += \
     src/core/interfaces/IPdfMerger.h \
     src/core/interfaces/IPdfRenderer.h \
     src/infrastructure/BaseTask.h \
+    src/infrastructure/ImageToPdfTask.h \
+    src/infrastructure/MergeTask.h \
+    src/infrastructure/RenderTask.h \
     src/infrastructure/TaskQueueManager.h \
     src/infrastructure/TaskSignals.h
 

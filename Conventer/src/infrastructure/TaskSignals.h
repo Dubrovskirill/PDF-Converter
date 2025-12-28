@@ -19,6 +19,8 @@ signals:
     void progress(int percentage);
 
     void started();
+
+    void resultReady(const QImage &image);
 };
 
 #endif // TASKSIGNALS_H
