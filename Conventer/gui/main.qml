@@ -24,7 +24,7 @@ Window {
                 if (serviceType === "imagesToPdf") {
                     mainStack.push(servicePage, { title: "Картинки в PDF" })
                 } else if (serviceType === "allToPdf") {
-                    mainStack.push(servicePage, { title: "Объеденить PDF" })
+                    mainStack.push(servicePage, { title: "Объединить PDF" })
                 }
             }
         }

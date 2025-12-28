@@ -12,23 +12,23 @@ Item {
     property var allFilesFilters: ["All supported (*.jpg *.jpeg *.png *.pdf)", "Image files (*.jpg *.jpeg *.png)", "PDF files (*.pdf)"]
 
     FileDialog {
-            id: fileDialog
-            title: "Please choose files"
-            folder: shortcuts.pictures
-            selectMultiple: true
-            nameFilters: root.title === "Картинки в PDF" ? imageFilters : allFilesFilters
+        id: fileDialog
+        title: "Please choose files"
+        folder: shortcuts.pictures
+        selectMultiple: true
+        nameFilters: root.title === "Картинки в PDF" ? imageFilters : allFilesFilters
 
-            onAccepted: {
-                console.log("Selected files from dialog:")
-                for (var i = 0; i < fileUrls.length; i++) {
-                    console.log("- " + fileUrls[i])
-                }
-                // Здесь позже: viewModel.addFiles(fileUrls)
+        onAccepted: {
+            console.log("Selected files from dialog:")
+            for (var i = 0; i < fileUrls.length; i++) {
+                console.log("- " + fileUrls[i])
             }
-            onRejected: {
-                console.log("Canceled")
-            }
+            // Здесь позже: viewModel.addFiles(fileUrls)
         }
+        onRejected: {
+            console.log("Canceled")
+        }
+    }
 
     ColumnLayout {
         anchors.fill: parent
@@ -48,7 +48,30 @@ Item {
                 font.bold: true
                 Layout.leftMargin: 10
             }
+            RowLayout {
+                visible: root.title === "Картинки в PDF"
+                spacing: 10
+                Layout.leftMargin: 20
 
+                CheckBox {
+                    id: mergeCheck
+                    checked: false
+                    text: ""
+                    implicitWidth: 30
+                }
+
+                Text {
+                    text: "Объединить в один PDF"
+                    font.pixelSize: 14
+                    color: "#333"
+                    verticalAlignment: Text.AlignVCenter
+
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: mergeCheck.checked = !mergeCheck.checked
+                    }
+                }
+            }
             Item { Layout.fillWidth: true }
 
             Button {
@@ -89,8 +112,8 @@ Item {
             }
 
             DropZone {
-                    anchors.fill: parent
-                }
+                anchors.fill: parent
+            }
 
             ScrollBar.vertical: ScrollBar {
                 policy: ScrollBar.AsNeeded
@@ -98,12 +121,12 @@ Item {
         }
 
         ServiceFooter {
-                Layout.fillWidth: true
-                actionText: root.title === "Картинки в PDF" ? "Convert to PDF" : "Merge PDF"
+            Layout.fillWidth: true
+            actionText: root.title === "Картинки в PDF" ? "Convert to PDF" : "Merge PDF"
 
-                onActionClicked: {
-                    console.log("Action started for: " + root.title)
-                }
+            onActionClicked: {
+                console.log("Action started for: " + root.title)
             }
+        }
     }
 }

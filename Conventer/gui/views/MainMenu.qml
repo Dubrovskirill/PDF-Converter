@@ -26,7 +26,7 @@ Item {
         }
 
         Button {
-            text: "Объеденить PDF"
+            text: "Объединить PDF"
             Layout.preferredWidth: 250
             Layout.preferredHeight: 60
             onClicked: root.serviceSelected("allToPdf")
