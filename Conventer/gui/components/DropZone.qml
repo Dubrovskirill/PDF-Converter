@@ -5,6 +5,7 @@ DropArea {
     id: dropArea
     anchors.fill: parent
 
+    opacity: (dropArea.containsDrag && dropArea.drag.hasUrls) ? 0.2 : 0
     property bool containsDrag: false
     property int validCount: 0
     property int invalidCount: 0

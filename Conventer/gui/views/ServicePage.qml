@@ -2,14 +2,75 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 import QtQuick.Dialogs 1.3
+import QtQml.Models 2.15
 import "../components"
 
 Item {
     id: root
+
+
     property string title: "Service"
     signal backRequested()
     property var imageFilters: ["Image files (*.jpg *.jpeg *.png)"]
     property var allFilesFilters: ["All supported (*.jpg *.jpeg *.png *.pdf)", "Image files (*.jpg *.jpeg *.png)", "PDF files (*.pdf)"]
+
+    ListModel {
+        id: filesModel
+        ListElement { name: "Летний_отпуск_01.jpg"; size: "2.4 MB"; error: false; processing: false }
+        ListElement { name: "Документ_со_сканера.pdf"; size: "15.1 MB"; error: false; processing: false }
+        ListElement { name: "Ошибка_загрузки.png"; size: "0 KB"; error: true; processing: false }
+        ListElement { name: "Обработка_фото.jpg"; size: "4.2 MB"; error: false; processing: true }
+        ListElement { name: "Презентация.pdf"; size: "8.7 MB"; error: false; processing: false }
+        ListElement { name: "Очень_длинное_название_файла_для_проверки_элайда.jpg"; size: "1.2 MB"; error: false; processing: false }
+    }
+
+    function logFileOrder() {
+        console.log("--- Current File Order (Internal) ---");
+        // Мы идем именно по visualModel, так как там хранится актуальный порядок
+        for (var i = 0; i < visualModel.items.count; i++) {
+            // Получаем объект из модели по индексу визуальной группы
+            var item = visualModel.items.get(i).model;
+            console.log(i + ": " + item.name);
+        }
+        console.log("-------------------------------------");
+    }
+
+    DelegateModel {
+        id: visualModel
+        model: filesModel
+        delegate: FileCard {
+            id: delegateItem
+            fileName: model.name
+            fileSize: model.size
+            isError: model.error
+            isProcessing: model.processing
+
+            width: fileGrid.cellWidth
+            height: fileGrid.cellHeight
+
+            onRemoveClicked: {
+                console.log("Removing item at index:", index)
+                filesModel.remove(index)
+            }
+
+            DropArea {
+                anchors.fill: parent
+                keys: ["file_card"]
+
+                onEntered: (drag) => {
+                               // Проверяем, что у источника есть наш индекс
+                               if (drag.source && drag.source.visualIndex !== undefined) {
+                                   var from = drag.source.visualIndex;
+                                   var to = delegateItem.DelegateModel.itemsIndex;
+
+                                   if (from !== to) {
+                                       visualModel.items.move(from, to);
+                                   }
+                               }
+                           }
+            }
+        }
+    }
 
     FileDialog {
         id: fileDialog
@@ -23,7 +84,6 @@ Item {
             for (var i = 0; i < fileUrls.length; i++) {
                 console.log("- " + fileUrls[i])
             }
-            // Здесь позже: viewModel.addFiles(fileUrls)
         }
         onRejected: {
             console.log("Canceled")
@@ -48,6 +108,7 @@ Item {
                 font.bold: true
                 Layout.leftMargin: 10
             }
+
             RowLayout {
                 visible: root.title === "Картинки в PDF"
                 spacing: 10
@@ -72,6 +133,7 @@ Item {
                     }
                 }
             }
+
             Item { Layout.fillWidth: true }
 
             Button {
@@ -81,7 +143,6 @@ Item {
             }
         }
 
-        // Рабочая область с сеткой
         GridView {
             id: fileGrid
             Layout.fillWidth: true
@@ -91,48 +152,40 @@ Item {
             cellHeight: 220
             clip: true
 
-            model: ListModel {
-                ListElement { name: "Летний_отпуск_01.jpg"; size: "2.4 MB"; error: false; processing: false }
-                ListElement { name: "Документ_со_сканера.pdf"; size: "15.1 MB"; error: false; processing: false }
-                ListElement { name: "Ошибка_загрузки.png"; size: "0 KB"; error: true; processing: false }
-                ListElement { name: "Обработка_фото.jpg"; size: "4.2 MB"; error: false; processing: true }
-                ListElement { name: "Презентация.pdf"; size: "8.7 MB"; error: false; processing: false }
-                ListElement { name: "Очень_длинное_название_файла_для_проверки_элайда.jpg"; size: "1.2 MB"; error: false; processing: false }
-            }
 
-            delegate: FileCard {
-                fileName: model.name
-                fileSize: model.size
-                isError: model.error
-                isProcessing: model.processing
-                onRemoveClicked: {
-                    console.log("Removing item at index:", index)
-                    // Здесь позже будет логика удаления из реальной модели
-                }
-            }
 
             DropZone {
                 anchors.fill: parent
+                z: -1
             }
-
+            model: visualModel
             ScrollBar.vertical: ScrollBar {
                 policy: ScrollBar.AsNeeded
+            }
+
+            move: Transition {
+                NumberAnimation { properties: "x,y"; duration: 200; easing.type: Easing.OutQuad }
+            }
+
+            displaced: Transition {
+                NumberAnimation { properties: "x,y"; duration: 200; easing.type: Easing.OutQuad }
             }
         }
 
         ServiceFooter {
             id: serviceFooter
+
             Layout.fillWidth: true
             actionText: root.title === "Картинки в PDF" ? "Convert to PDF" : "Merge PDF"
-
 
             isFinished: progress >= 1.0
 
             onActionClicked: {
-                console.log("Action started for: " + root.title)
-                // Тестовая логика:
-                progress = 1.0
-                statusText = "Completed! Files saved to output folder."
+                root.logFileOrder(); // Проверяем порядок перед "обработкой"
+
+                console.log("Action started for: " + root.title);
+                progress = 1.0;
+                statusText = "Completed! Files saved to output folder.";
             }
 
             onOpenFolderClicked: {
