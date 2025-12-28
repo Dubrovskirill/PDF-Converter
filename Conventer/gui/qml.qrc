@@ -3,5 +3,6 @@
         <file>main.qml</file>
         <file>views/MainMenu.qml</file>
         <file>views/ServicePage.qml</file>
+        <file>components/FileCard.qml</file>
     </qresource>
 </RCC>
