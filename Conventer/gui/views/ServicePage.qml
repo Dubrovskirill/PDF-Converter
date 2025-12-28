@@ -1,12 +1,34 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
+import QtQuick.Dialogs 1.3
 import "../components"
 
 Item {
     id: root
     property string title: "Service"
     signal backRequested()
+    property var imageFilters: ["Image files (*.jpg *.jpeg *.png)"]
+    property var allFilesFilters: ["All supported (*.jpg *.jpeg *.png *.pdf)", "Image files (*.jpg *.jpeg *.png)", "PDF files (*.pdf)"]
+
+    FileDialog {
+            id: fileDialog
+            title: "Please choose files"
+            folder: shortcuts.pictures
+            selectMultiple: true
+            nameFilters: root.title === "Картинки в PDF" ? imageFilters : allFilesFilters
+
+            onAccepted: {
+                console.log("Selected files from dialog:")
+                for (var i = 0; i < fileUrls.length; i++) {
+                    console.log("- " + fileUrls[i])
+                }
+                // Здесь позже: viewModel.addFiles(fileUrls)
+            }
+            onRejected: {
+                console.log("Canceled")
+            }
+        }
 
     ColumnLayout {
         anchors.fill: parent
@@ -32,6 +54,7 @@ Item {
             Button {
                 text: "+ Добавить файлы"
                 highlighted: true
+                onClicked: fileDialog.open()
             }
         }
 
