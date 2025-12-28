@@ -42,6 +42,7 @@ QMAKE_EXTRA_TARGETS += first copy_dlls
 
 # --- ФАЙЛЫ ПРОЕКТА ---
 SOURCES += \
+    main.cpp \
     src/test/TestAsyncTasks.cpp \
     src/test/TestPdfRenderer.cpp \
     src/test/TestQPdfMerger.cpp \
@@ -62,5 +63,5 @@ HEADERS += \
     src/infrastructure/TaskQueueManager.h \
     src/infrastructure/TaskSignals.h
 
-RESOURCES += qml.qrc
-QML_IMPORT_PATH = src/gui
+RESOURCES += gui/qml.qrc
+QML_IMPORT_PATH = gui

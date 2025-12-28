@@ -102,5 +102,5 @@ private slots:
     }
 };
 
-QTEST_MAIN(TestAsyncTasks)
-#include "TestAsyncTasks.moc"
+//QTEST_MAIN(TestAsyncTasks)
+//#include "TestAsyncTasks.moc"
