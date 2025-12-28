@@ -8,6 +8,11 @@ QT += quick gui core printsupport testlib
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 
+QPDF_DIR = $$PWD/3rdparty/qpdf
+INCLUDEPATH += $$QPDF_DIR/include
+LIBS += -L$$QPDF_DIR/lib -lqpdf
+
+
 INCLUDEPATH += src/core \
                src/viewmodel
 
@@ -17,6 +22,7 @@ SOURCES += \
     src/test/TestQtImageConverter.cpp
 
 HEADERS += \
+    src/core/QPdfMerger.h \
     src/core/QtImageConverter.h \
     src/core/interfaces/IImageConverter.h \
     src/core/interfaces/IPdfEditor.h \
