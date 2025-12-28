@@ -1,0 +1,4 @@
+#ifndef IPDFRENDERER_H
+#define IPDFRENDERER_H
+
+#endif // IPDFRENDERER_H

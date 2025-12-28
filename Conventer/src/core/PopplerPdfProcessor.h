@@ -14,7 +14,7 @@ public:
     bool renderPageToImage(const QString &sourceFile, int pageIndex, const QString &outputImagePath) override;
     int getPageCount(const QString &sourceFile) override;
 
-    bool imagesToPdf(const QStringList &imageFiles, const QString &outputFile);
+    bool imagesToPdf(const QStringList &imageFiles, const QString &outputFile) override;
 };
 
 #endif // POPPLERPDFPROCESSOR_H

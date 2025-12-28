@@ -15,6 +15,7 @@ public:
     virtual bool extractPages(const QString &sourceFile, const QString &outputFile, const QVector<int> &pageIndices) = 0;
     virtual bool renderPageToImage(const QString &sourceFile, int pageIndex, const QString &outputImagePath) = 0;
     virtual int getPageCount(const QString &sourceFile) = 0;
+    virtual bool imagesToPdf(const QStringList &imageFiles, const QString &outputFile) = 0;
 };
 
 #endif // IPDFPROCESSOR_H

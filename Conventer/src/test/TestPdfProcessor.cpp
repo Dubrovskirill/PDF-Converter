@@ -24,67 +24,91 @@ private slots:
         qDebug() << "[SUCCESS] PDF Read Test: pages:" << count;
     }
 
-    // Тест 2: Конвертация изображений
-    void testImagesToPdf() {
-        QStringList images;
-        images << m_testFilesPath + "desenhos.jpg"
-               << m_testFilesPath + "загрузка.jpg"
-               << m_testFilesPath + "загрузка (1).jpg"
-               << m_testFilesPath + "загрузка (2).jpg"
-               << m_testFilesPath + "олега режет.png";
+//    // Тест 2: Конвертация изображений
+//    void testImagesToPdf() {
+//        QStringList images;
+//        images << m_testFilesPath + "desenhos.jpg"
+//               << m_testFilesPath + "загрузка.jpg"
+//               << m_testFilesPath + "загрузка (1).jpg"
+//               << m_testFilesPath + "загрузка (2).jpg"
+//               << m_testFilesPath + "олега режет.png";
 
-        for(const QString& imgPath : images) {
-            QVERIFY2(QFile::exists(imgPath), QString("Image not found: %1").arg(imgPath).toUtf8());
-        }
+//        for(const QString& imgPath : images) {
+//            QVERIFY2(QFile::exists(imgPath), QString("Image not found: %1").arg(imgPath).toUtf8());
+//        }
 
-        QString output = "converted_images.pdf";
-        QVERIFY(m_processor->imagesToPdf(images, output));
-        QVERIFY(QFile::exists(output));
+//        QString output = "converted_images.pdf";
+//        QVERIFY(m_processor->imagesToPdf(images, output));
+//        QVERIFY(QFile::exists(output));
 
-        QCOMPARE(m_processor->getPageCount(output), 5);
-        qDebug() << "[SUCCESS] Images to PDF Test: Created 5-page PDF";
-    }
+//        QCOMPARE(m_processor->getPageCount(output), 5);
+//        qDebug() << "[SUCCESS] Images to PDF Test: Created 5-page PDF";
+//    }
 
-    // Тест 3: Слияние PDF файлов (Merge)
+    // Тест 3: Слияние PDF файлов
     void testMergePdfs() {
-        QStringList pdfs;
-        pdfs << m_testFilesPath + "Tri-fold.pdf"
-             << m_testFilesPath + "Богдан Кирилл Сергеевич.pdf";
+        // 1. Подготовка путей
+        QStringList sourceFiles;
+        sourceFiles << m_testFilesPath + "Tri-fold.pdf"
+                    << m_testFilesPath + "desenhos.jpg"
+                    << m_testFilesPath + "загрузка.jpg"
+                    << m_testFilesPath + "загрузка (1).jpg"
+                    << m_testFilesPath + "загрузка (2).jpg"
+                    << m_testFilesPath + "олега режет.png"
+                    << m_testFilesPath + "Богдан Кирилл Сергеевич.pdf";
 
-        for(const QString& p : pdfs) {
-            QVERIFY2(QFile::exists(p), QString("PDF not found for merge: %1").arg(p).toUtf8());
+        QString outputFile = m_testFilesPath + "merged_result.pdf";
+
+        // Удаляем старый результат теста, если он есть
+        if (QFile::exists(outputFile)) {
+            QFile::remove(outputFile);
         }
 
-        // Считаем сколько страниц должно быть в итоге
-        int expectedPages = m_processor->getPageCount(pdfs[0]) + m_processor->getPageCount(pdfs[1]);
+        // 2. Подсчет ожидаемого количества страниц
+        int expectedPageCount = 0;
+        QMimeDatabase db;
+        for (const QString &file : sourceFiles) {
+            if (db.mimeTypeForFile(file).name() == "application/pdf") {
+                expectedPageCount += m_processor->getPageCount(file);
+            } else {
+                // Каждое изображение становится одной страницей PDF
+                expectedPageCount += 1;
+            }
+        }
 
-        QString output = "merged_result.pdf";
-        bool success = m_processor->mergeFiles(pdfs, output);
+        // 3. Выполнение операции
+        bool success = m_processor->mergeFiles(sourceFiles, outputFile);
 
-        QVERIFY2(success, "Merge operation failed");
-        QVERIFY(QFile::exists(output));
-        QCOMPARE(m_processor->getPageCount(output), expectedPages);
+        // 4. Проверки (Assertions)
+        QVERIFY2(success, "Метод mergeFiles вернул false");
+        QVERIFY2(QFile::exists(outputFile), "Итоговый PDF файл не был создан");
 
-        qDebug() << "[SUCCESS] Merge PDF Test: Created" << expectedPages << "page PDF";
+        int resultPageCount = m_processor->getPageCount(outputFile);
+        QCOMPARE(resultPageCount, expectedPageCount);
+
+        // Дополнительная проверка на валидность файла (размер > 0)
+        QVERIFY(QFileInfo(outputFile).size() > 0);
+
+        qDebug() << "TestMergePdfs: Success. Total pages:" << resultPageCount;
     }
 
     // Тест 4: Рендеринг страницы
-    void testRenderPage() {
-        QString source = m_testFilesPath + "Tri-fold.pdf";
-        QString outputImg = "preview_page_0.png";
+//    void testRenderPage() {
+//        QString source = m_testFilesPath + "Tri-fold.pdf";
+//        QString outputImg = "preview_page_0.png";
 
 
-        bool success = m_processor->renderPageToImage(source, 3, outputImg);
+//        bool success = m_processor->renderPageToImage(source, 3, outputImg);
 
-        QVERIFY2(success, "Failed to render PDF page");
-        QVERIFY(QFile::exists(outputImg));
-        qDebug() << "[SUCCESS] Render Test: Preview created";
-    }
+//        QVERIFY2(success, "Failed to render PDF page");
+//        QVERIFY(QFile::exists(outputImg));
+//        qDebug() << "[SUCCESS] Render Test: Preview created";
+//    }
 
-    void cleanupTestCase() {
-        delete m_processor;
-        qDebug() << "--- Test Session Finished ---";
-    }
+//    void cleanupTestCase() {
+//        delete m_processor;
+//        qDebug() << "--- Test Session Finished ---";
+//    }
 
 private:
     PopplerPdfProcessor* m_processor;

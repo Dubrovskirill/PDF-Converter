@@ -21,7 +21,10 @@ SOURCES += \
 
 HEADERS += \
     src/core/IPdfProcessor.h \
-    src/core/PopplerPdfProcessor.h
+    src/core/PopplerPdfProcessor.h \
+    src/core/interfaces/IPdfBuilder.h \
+    src/core/interfaces/IPdfEditor.h \
+    src/core/interfaces/IPdfRenderer.h
 
 RESOURCES += qml.qrc
 

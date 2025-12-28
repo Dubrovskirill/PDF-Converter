@@ -1,37 +1,18 @@
 #include "PopplerPdfProcessor.h"
+#include "qdebug.h"
+#include "quuid.h"
 #include <QPdfWriter>
 #include <QPainter>
 #include <QImage>
 #include <QFileInfo>
+#include <QProcess>
+#include <QDir>
+#include <QMimeDatabase>
+#include <QMimeType>
 
-bool PopplerPdfProcessor::mergeFiles(const QStringList &sourceFiles, const QString &outputFile) {
-    if (sourceFiles.isEmpty()) return false;
 
-    QPdfWriter writer(outputFile);
-    QPainter painter(&writer);
 
-    for (const QString &filePath : sourceFiles) {
-        Poppler::Document* doc = Poppler::Document::load(filePath);
-        if (!doc) continue;
 
-        for (int i = 0; i < doc->numPages(); ++i) {
-            Poppler::Page* page = doc->page(i);
-            if (page) {
-                QImage img = page->renderToImage(300, 300);
-
-                if (i > 0 || filePath != sourceFiles.first()) {
-                    writer.newPage();
-                }
-
-                painter.drawImage(writer.pageLayout().paintRectPixels(writer.resolution()), img);
-                delete page;
-            }
-        }
-        delete doc;
-    }
-    painter.end();
-    return true;
-}
 
 bool PopplerPdfProcessor::imagesToPdf(const QStringList &imageFiles, const QString &outputFile) {
     if (imageFiles.isEmpty()) return false;
