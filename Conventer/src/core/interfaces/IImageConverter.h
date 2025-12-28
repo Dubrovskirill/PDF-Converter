@@ -1,4 +1,3 @@
-
 #ifndef IIMAGECONVERTER_H
 #define IIMAGECONVERTER_H
 
@@ -8,7 +7,7 @@
 class IImageConverter {
 public:
     virtual ~IImageConverter() = default;
-    virtual bool imagesToPdf(const QStringList &imageFiles, const QString &outputPdfPath) = 0;
+    virtual bool batchConvertToPdf(const QStringList &imageFiles, const QString &outputDir) = 0;
 };
 
 #endif // IIMAGECONVERTER_H
