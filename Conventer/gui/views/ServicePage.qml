@@ -60,7 +60,7 @@ Item {
                 isError: model.error
                 isProcessing: model.processing
                 onRemoveClicked: {
-                    console.log("Удаляем элемент под индексом:", index)
+                    console.log("Removing item at index:", index)
                     // Здесь позже будет логика удаления из реальной модели
                 }
             }
@@ -73,5 +73,14 @@ Item {
                 policy: ScrollBar.AsNeeded
             }
         }
+
+        ServiceFooter {
+                Layout.fillWidth: true
+                actionText: root.title === "Картинки в PDF" ? "Convert to PDF" : "Merge PDF"
+
+                onActionClicked: {
+                    console.log("Action started for: " + root.title)
+                }
+            }
     }
 }
