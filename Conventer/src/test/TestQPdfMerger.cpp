@@ -74,5 +74,5 @@ private:
     QString m_baseOutputPath = "D:/c++ everything/PDF-Converter/test_output/merger_results/";
 };
 
-QTEST_MAIN(TestQPdfMerger)
-#include "TestQPdfMerger.moc"
+//QTEST_MAIN(TestQPdfMerger)
+//#include "TestQPdfMerger.moc"

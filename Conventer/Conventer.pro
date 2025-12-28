@@ -1,40 +1,54 @@
 QT += quick gui core printsupport testlib
 CONFIG += c++17
 
-# Настройки QPDF
+# Настройки путей проекта
+INCLUDEPATH += src/core \
+               src/viewmodel
+
+# --- БИБЛИОТЕКА QPDF ---
 QPDF_DIR = $$PWD/3rdparty/qpdf
 INCLUDEPATH += $$QPDF_DIR/include
 LIBS += -L$$QPDF_DIR/lib -lqpdf
 
-# --- АВТОМАТИЧЕСКОЕ КОПИРОВАНИЕ DLL ---
-QPDF_BIN = $$PWD/3rdparty/qpdf/bin
-# Преобразуем пути в формат Windows (с обратными слешами)
-WIN_BIN = $$replace(QPDF_BIN, /, \\)
-WIN_OUT = $$replace(OUT_PWD, /, \\)
+# --- БИБЛИОТЕКА POPPLER ---
+POPPLER_DIR = $$PWD/3rdparty/poppler
+INCLUDEPATH += $$POPPLER_DIR/include/poppler/qt5 \
+               $$POPPLER_DIR/include/poppler
+LIBS += -L$$POPPLER_DIR/lib -lpoppler-qt5
 
-# Команда xcopy: /Y (без подтверждения), /I (если папки нет - создать)
-# Копируем и в корень билда, и в папки debug/release, где обычно сидят тесты
-copy_dlls.commands = xcopy /Y /I \"$$WIN_BIN\\*.dll\" \"$$WIN_OUT\\\" && \
-                     xcopy /Y /I \"$$WIN_BIN\\*.dll\" \"$$WIN_OUT\\debug\\\" && \
-                     xcopy /Y /I \"$$WIN_BIN\\*.dll\" \"$$WIN_OUT\\release\\\"
+# --- АВТОМАТИЧЕСКОЕ КОПИРОВАНИЕ DLL ---
+QPDF_BIN_WIN = $$replace(QPDF_DIR, /, \\)\\bin
+POPPLER_BIN_WIN = $$replace(POPPLER_DIR, /, \\)\\bin
+OUT_PWD_WIN = $$replace(OUT_PWD, /, \\)
+
+# Копируем только те DLL, которые не конфликтуют с Qt
+# /Exclude не очень удобно использовать в xcopy, поэтому копируем по маскам
+copy_dlls.commands = xcopy /Y /I \"$$QPDF_BIN_WIN\\*.dll\" \"$$OUT_PWD_WIN\\debug\\\" && \
+                     xcopy /Y /I \"$$POPPLER_BIN_WIN\\lib*.dll\" \"$$OUT_PWD_WIN\\debug\\\" && \
+                     xcopy /Y /I \"$$POPPLER_BIN_WIN\\nss*.dll\" \"$$OUT_PWD_WIN\\debug\\\" && \
+                     xcopy /Y /I \"$$POPPLER_BIN_WIN\\zlib*.dll\" \"$$OUT_PWD_WIN\\debug\\\" && \
+                     xcopy /Y /I \"$$POPPLER_BIN_WIN\\smime3.dll\" \"$$OUT_PWD_WIN\\debug\\\"
+
+# Повторяем для release папки
+copy_dlls.commands += && xcopy /Y /I \"$$QPDF_BIN_WIN\\*.dll\" \"$$OUT_PWD_WIN\\release\\\" \
+                     && xcopy /Y /I \"$$POPPLER_BIN_WIN\\lib*.dll\" \"$$OUT_PWD_WIN\\release\\\" \
+                     && xcopy /Y /I \"$$POPPLER_BIN_WIN\\nss*.dll\" \"$$OUT_PWD_WIN\\release\\\" \
+                     && xcopy /Y /I \"$$POPPLER_BIN_WIN\\zlib*.dll\" \"$$OUT_PWD_WIN\\release\\\" \
+                     && xcopy /Y /I \"$$POPPLER_BIN_WIN\\smime3.dll\" \"$$OUT_PWD_WIN\\release\\\"
 
 first.depends = $(first) copy_dlls
-export(first.depends)
-export(copy_dlls.commands)
 QMAKE_EXTRA_TARGETS += first copy_dlls
-# ---------------------------------------
 
-INCLUDEPATH += src/core \
-               src/viewmodel
-
+# --- ФАЙЛЫ ПРОЕКТА ---
 SOURCES += \
-    # main.cpp \
+    src/test/TestPdfRenderer.cpp \
     src/test/TestQPdfMerger.cpp \
     src/test/TestQtImageConverter.cpp
 
 HEADERS += \
     src/core/QPdfMerger.h \
     src/core/QtImageConverter.h \
+    src/core/QtPdfRenderer.h \
     src/core/interfaces/IImageConverter.h \
     src/core/interfaces/IPdfEditor.h \
     src/core/interfaces/IPdfMerger.h \

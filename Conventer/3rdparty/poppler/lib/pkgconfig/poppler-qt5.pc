@@ -1,0 +1,13 @@
+prefix=/mingw64
+libdir=/mingw64/lib
+includedir=/mingw64/include
+
+Name: poppler-qt5
+Description: Qt5 bindings for poppler
+Version: 25.10.0
+Requires.private: freetype2 >= 2.11 \
+                  poppler = 25.10.0
+
+Libs: -L${libdir} -lpoppler-qt5
+Libs.private: -lQt5Gui -lQt5Xml -lQt5Core
+Cflags: -I${includedir}/poppler/qt5
