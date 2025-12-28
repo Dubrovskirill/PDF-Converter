@@ -53,6 +53,7 @@ HEADERS += \
     src/core/interfaces/IPdfEditor.h \
     src/core/interfaces/IPdfMerger.h \
     src/core/interfaces/IPdfRenderer.h \
+    src/infrastructure/BaseTask.h \
     src/infrastructure/TaskSignals.h
 
 RESOURCES += qml.qrc
