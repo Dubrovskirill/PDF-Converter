@@ -56,5 +56,5 @@ private:
     QString m_basePath = "D:/c++ everything/PDF-Converter/test_output/";
 };
 
-QTEST_MAIN(TestQtImageConverter)
-#include "TestQtImageConverter.moc"
+//QTEST_MAIN(TestQtImageConverter)
+//#include "TestQtImageConverter.moc"

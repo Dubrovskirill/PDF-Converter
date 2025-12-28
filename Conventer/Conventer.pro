@@ -1,24 +1,35 @@
-QT += quick
-CONFIG += c++17
-QT += quick gui core printsupport
-QT += testlib
 QT += quick gui core printsupport testlib
-# You can make your code fail to compile if it uses deprecated APIs.
-# In order to do so, uncomment the following line.
-#DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
+CONFIG += c++17
 
-
+# Настройки QPDF
 QPDF_DIR = $$PWD/3rdparty/qpdf
 INCLUDEPATH += $$QPDF_DIR/include
 LIBS += -L$$QPDF_DIR/lib -lqpdf
 
+# --- АВТОМАТИЧЕСКОЕ КОПИРОВАНИЕ DLL ---
+QPDF_BIN = $$PWD/3rdparty/qpdf/bin
+# Преобразуем пути в формат Windows (с обратными слешами)
+WIN_BIN = $$replace(QPDF_BIN, /, \\)
+WIN_OUT = $$replace(OUT_PWD, /, \\)
+
+# Команда xcopy: /Y (без подтверждения), /I (если папки нет - создать)
+# Копируем и в корень билда, и в папки debug/release, где обычно сидят тесты
+copy_dlls.commands = xcopy /Y /I \"$$WIN_BIN\\*.dll\" \"$$WIN_OUT\\\" && \
+                     xcopy /Y /I \"$$WIN_BIN\\*.dll\" \"$$WIN_OUT\\debug\\\" && \
+                     xcopy /Y /I \"$$WIN_BIN\\*.dll\" \"$$WIN_OUT\\release\\\"
+
+first.depends = $(first) copy_dlls
+export(first.depends)
+export(copy_dlls.commands)
+QMAKE_EXTRA_TARGETS += first copy_dlls
+# ---------------------------------------
 
 INCLUDEPATH += src/core \
                src/viewmodel
 
-
 SOURCES += \
     # main.cpp \
+    src/test/TestQPdfMerger.cpp \
     src/test/TestQtImageConverter.cpp
 
 HEADERS += \
@@ -30,18 +41,4 @@ HEADERS += \
     src/core/interfaces/IPdfRenderer.h
 
 RESOURCES += qml.qrc
-
 QML_IMPORT_PATH = src/gui
-
-
-
-# Additional import path used to resolve QML modules in Qt Creator's code model
-QML_IMPORT_PATH =
-
-# Additional import path used to resolve QML modules just for Qt Quick Designer
-QML_DESIGNER_IMPORT_PATH =
-
-# Default rules for deployment.
-qnx: target.path = /tmp/$${TARGET}/bin
-else: unix:!android: target.path = /opt/$${TARGET}/bin
-!isEmpty(target.path): INSTALLS += target
