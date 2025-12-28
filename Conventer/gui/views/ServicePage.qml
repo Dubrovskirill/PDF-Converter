@@ -121,11 +121,22 @@ Item {
         }
 
         ServiceFooter {
+            id: serviceFooter
             Layout.fillWidth: true
             actionText: root.title === "Картинки в PDF" ? "Convert to PDF" : "Merge PDF"
 
+
+            isFinished: progress >= 1.0
+
             onActionClicked: {
                 console.log("Action started for: " + root.title)
+                // Тестовая логика:
+                progress = 1.0
+                statusText = "Completed! Files saved to output folder."
+            }
+
+            onOpenFolderClicked: {
+                console.log("Opening folder with results...")
             }
         }
     }

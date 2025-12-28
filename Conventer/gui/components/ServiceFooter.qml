@@ -12,8 +12,10 @@ Rectangle {
     property double progress: 0.0
     property string statusText: "Ready to work"
     property string actionText: "Convert"
+    property bool isFinished: false
 
     signal actionClicked()
+    signal openFolderClicked()
 
     RowLayout {
         anchors.fill: parent
@@ -46,10 +48,27 @@ Rectangle {
                         width: progressBar.visualPosition * parent.width
                         height: parent.height
                         radius: 4
-                        color: "#3498db"
+                        color: footerRoot.isFinished ? "#2ecc71" : "#3498db"
                     }
                 }
             }
+        }
+
+
+        Button {
+            id: folderButton
+            text: "📁"
+            visible: footerRoot.isFinished
+            Layout.preferredWidth: 40
+            Layout.preferredHeight: 40
+
+            background: Rectangle {
+                color: folderButton.pressed ? "#d5d8dc" : (folderButton.hovered ? "#ebedef" : "#f4f6f7")
+                radius: 6
+                border.color: "#bdc3c7"
+            }
+
+            onClicked: footerRoot.openFolderClicked()
         }
 
         Button {
