@@ -115,7 +115,23 @@ Item {
             }
 
             Item { Layout.fillWidth: true }
+            Button {
+                text: "Очистить всё"
 
+                visible: filesModel.count > 0
+
+                contentItem: Text {
+                    text: parent.text
+                    color: "red"
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+
+                onClicked: {
+                    console.log("QML: Clearing all files from model")
+                    filesModel.clear()
+                }
+            }
             Button {
                 text: "+ Добавить файлы"
                 highlighted: true
