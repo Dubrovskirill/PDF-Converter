@@ -15,12 +15,12 @@ Item {
 
     ListModel {
         id: filesModel
-//        ListElement { name: "Летний_отпуск_01.jpg"; size: "2.4 MB"; error: false; processing: false }
-//        ListElement { name: "Документ_со_сканера.pdf"; size: "15.1 MB"; error: false; processing: false }
-//        ListElement { name: "Ошибка_загрузки.png"; size: "0 KB"; error: true; processing: false }
-//        ListElement { name: "Обработка_фото.jpg"; size: "4.2 MB"; error: false; processing: true }
-//        ListElement { name: "Презентация.pdf"; size: "8.7 MB"; error: false; processing: false }
-//        ListElement { name: "Очень_длинное_название_файла_для_проверки_элайда.jpg"; size: "1.2 MB"; error: false; processing: false }
+        ListElement { name: "Летний_отпуск_01.jpg"; size: "2.4 MB"; error: false; processing: false }
+        ListElement { name: "Документ_со_сканера.pdf"; size: "15.1 MB"; error: false; processing: false }
+        ListElement { name: "Ошибка_загрузки.png"; size: "0 KB"; error: true; processing: false }
+        ListElement { name: "Обработка_фото.jpg"; size: "4.2 MB"; error: false; processing: true }
+        ListElement { name: "Презентация.pdf"; size: "8.7 MB"; error: false; processing: false }
+        ListElement { name: "Очень_длинное_название_файла_для_проверки_элайда.jpg"; size: "1.2 MB"; error: false; processing: false }
     }
 
     function logFileOrder() {

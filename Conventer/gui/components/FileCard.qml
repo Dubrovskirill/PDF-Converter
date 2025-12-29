@@ -67,26 +67,7 @@ Item {
                     visible: previewSource === ""
                 }
 
-                Button {
-                    anchors.top: parent.top
-                    anchors.right: parent.right
-                    anchors.margins: 4
-                    width: 24; height: 24
 
-                    visible: mouseArea.containsMouse && !mouseArea.drag.active
-
-                    background: Rectangle {
-                        radius: 12
-                        color: "white"
-                        border.color: "#ddd"
-                    }
-                    contentItem: Text {
-                        text: "✕"; color: "red";
-                        horizontalAlignment: Text.AlignHCenter
-                        verticalAlignment: Text.AlignVCenter
-                    }
-                    onClicked: root.removeClicked()
-                }
 
                 BusyIndicator {
                     anchors.centerIn: parent
@@ -112,19 +93,45 @@ Item {
                 horizontalAlignment: Text.AlignHCenter
             }
         }
-    }
 
-    MouseArea {
-        id: mouseArea
-        anchors.fill: parent
-        hoverEnabled: true
-        drag.target: cardRoot
+        MouseArea {
+            id: mouseArea
+            anchors.fill: parent
+            hoverEnabled: true
+            drag.target: cardRoot
 
-        // Добавь это:
-        onReleased: {
-            if (cardRoot.Drag.active) {
-                cardRoot.Drag.drop() // Фиксируем сброс
+            onReleased: {
+                if (cardRoot.Drag.active) {
+                    cardRoot.Drag.drop()
+                }
+            }
+        }
+        Button {
+            id: removeButton
+            anchors.top: parent.top
+            anchors.right: parent.right
+            anchors.margins: 12
+            width: 24; height: 24
+            z: 2
+
+           visible: (mouseArea.containsMouse || hovered) && !mouseArea.drag.active
+
+            background: Rectangle {
+                radius: 12
+                color: removeButton.hovered ? "#f4f4f4" : "white"
+                border.color: "#ddd"
+            }
+            contentItem: Text {
+                text: "✕"; color: "red";
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+            }
+            onClicked: {
+                console.log("QML: Clicked remove button on card:", fileName) // Лог для проверки
+                root.removeClicked()
             }
         }
     }
+
+
 }
