@@ -8,7 +8,6 @@ import "../components"
 Item {
     id: root
 
-
     property string title: "Service"
     signal backRequested()
     property var imageFilters: ["Image files (*.jpg *.jpeg *.png)"]
@@ -26,9 +25,7 @@ Item {
 
     function logFileOrder() {
         console.log("--- Current File Order (Internal) ---");
-        // Мы идем именно по visualModel, так как там хранится актуальный порядок
         for (var i = 0; i < visualModel.items.count; i++) {
-            // Получаем объект из модели по индексу визуальной группы
             var item = visualModel.items.get(i).model;
             console.log(i + ": " + item.name);
         }
@@ -57,17 +54,15 @@ Item {
                 anchors.fill: parent
                 keys: ["file_card"]
 
-                onEntered: (drag) => {
-                               // Проверяем, что у источника есть наш индекс
-                               if (drag.source && drag.source.visualIndex !== undefined) {
-                                   var from = drag.source.visualIndex;
-                                   var to = delegateItem.DelegateModel.itemsIndex;
-
-                                   if (from !== to) {
-                                       visualModel.items.move(from, to);
-                                   }
-                               }
-                           }
+                onEntered: function(drag) {
+                    if (drag.source && drag.source.visualIndex !== undefined) {
+                        var from = drag.source.visualIndex;
+                        var to = delegateItem.DelegateModel.itemsIndex;
+                        if (from !== to) {
+                            visualModel.items.move(from, to);
+                        }
+                    }
+                }
             }
         }
     }
@@ -84,9 +79,6 @@ Item {
             for (var i = 0; i < fileUrls.length; i++) {
                 console.log("- " + fileUrls[i])
             }
-        }
-        onRejected: {
-            console.log("Canceled")
         }
     }
 
@@ -113,24 +105,12 @@ Item {
                 visible: root.title === "Картинки в PDF"
                 spacing: 10
                 Layout.leftMargin: 20
-
-                CheckBox {
-                    id: mergeCheck
-                    checked: false
-                    text: ""
-                    implicitWidth: 30
-                }
-
+                CheckBox { id: mergeCheck; checked: false; text: ""; implicitWidth: 30 }
                 Text {
                     text: "Объединить в один PDF"
                     font.pixelSize: 14
                     color: "#333"
-                    verticalAlignment: Text.AlignVCenter
-
-                    MouseArea {
-                        anchors.fill: parent
-                        onClicked: mergeCheck.checked = !mergeCheck.checked
-                    }
+                    MouseArea { anchors.fill: parent; onClicked: mergeCheck.checked = !mergeCheck.checked }
                 }
             }
 
@@ -147,50 +127,75 @@ Item {
             id: fileGrid
             Layout.fillWidth: true
             Layout.fillHeight: true
-
             cellWidth: 180
             cellHeight: 220
             clip: true
 
-
+            // Пробрасываем ID наружу для оверлея
+            property alias dropZoneId: dropZoneLogic
 
             DropZone {
+                id: dropZoneLogic
                 anchors.fill: parent
                 z: -1
             }
+
             model: visualModel
-            ScrollBar.vertical: ScrollBar {
-                policy: ScrollBar.AsNeeded
-            }
+            ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
 
-            move: Transition {
-                NumberAnimation { properties: "x,y"; duration: 200; easing.type: Easing.OutQuad }
-            }
-
-            displaced: Transition {
-                NumberAnimation { properties: "x,y"; duration: 200; easing.type: Easing.OutQuad }
-            }
+            move: Transition { NumberAnimation { properties: "x,y"; duration: 200; easing.type: Easing.OutQuad } }
+            displaced: Transition { NumberAnimation { properties: "x,y"; duration: 200; easing.type: Easing.OutQuad } }
         }
 
         ServiceFooter {
             id: serviceFooter
-
             Layout.fillWidth: true
             actionText: root.title === "Картинки в PDF" ? "Convert to PDF" : "Merge PDF"
-
             isFinished: progress >= 1.0
-
             onActionClicked: {
-                root.logFileOrder(); // Проверяем порядок перед "обработкой"
-
-                console.log("Action started for: " + root.title);
+                root.logFileOrder();
                 progress = 1.0;
-                statusText = "Completed! Files saved to output folder.";
-            }
-
-            onOpenFolderClicked: {
-                console.log("Opening folder with results...")
+                statusText = "Completed!";
             }
         }
     }
+
+    Rectangle {
+            id: dropOverlay
+            // Позиционирование относительно fileGrid
+            x: fileGrid.x + 20
+            y: fileGrid.y + 20
+            width: fileGrid.width
+            height: fileGrid.height
+
+            z: 100
+            radius: 10
+
+            // Прямое обращение к ID DropZone для исключения ReferenceError
+            visible: dropZoneLogic.containsDrag && dropZoneLogic.isFileDrag
+            color: dropZoneLogic.invalidCount > 0 ? "#f39c12" : "#3498db"
+            opacity: 0.2
+
+            border.color: dropZoneLogic.invalidCount > 0 ? "#f39c12" : "#3498db"
+            border.width: 4
+
+            Column {
+                anchors.centerIn: parent
+                spacing: 15
+                Text {
+                    text: dropZoneLogic.invalidCount > 0 ? "⚠️" : "📥"
+                    font.pixelSize: 60
+                    anchors.horizontalCenter: parent.horizontalCenter
+                }
+                Text {
+                    text: dropZoneLogic.invalidCount > 0
+                        ? "Будет добавлено " + dropZoneLogic.validCount + " файл(ов). " + dropZoneLogic.invalidCount + " пропущено."
+                        : "Отпустите для добавления " + dropZoneLogic.validCount + " файл(ов)"
+                    font.pixelSize: 18
+                    font.bold: true
+                    color: dropZoneLogic.invalidCount > 0 ? "#e67e22" : "#2980b9"
+                    anchors.horizontalCenter: parent.horizontalCenter
+                }
+            }
+        }
 }
