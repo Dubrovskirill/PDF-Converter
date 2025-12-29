@@ -15,12 +15,12 @@ Item {
 
     ListModel {
         id: filesModel
-        ListElement { name: "Летний_отпуск_01.jpg"; size: "2.4 MB"; error: false; processing: false }
-        ListElement { name: "Документ_со_сканера.pdf"; size: "15.1 MB"; error: false; processing: false }
-        ListElement { name: "Ошибка_загрузки.png"; size: "0 KB"; error: true; processing: false }
-        ListElement { name: "Обработка_фото.jpg"; size: "4.2 MB"; error: false; processing: true }
-        ListElement { name: "Презентация.pdf"; size: "8.7 MB"; error: false; processing: false }
-        ListElement { name: "Очень_длинное_название_файла_для_проверки_элайда.jpg"; size: "1.2 MB"; error: false; processing: false }
+//        ListElement { name: "Летний_отпуск_01.jpg"; size: "2.4 MB"; error: false; processing: false }
+//        ListElement { name: "Документ_со_сканера.pdf"; size: "15.1 MB"; error: false; processing: false }
+//        ListElement { name: "Ошибка_загрузки.png"; size: "0 KB"; error: true; processing: false }
+//        ListElement { name: "Обработка_фото.jpg"; size: "4.2 MB"; error: false; processing: true }
+//        ListElement { name: "Презентация.pdf"; size: "8.7 MB"; error: false; processing: false }
+//        ListElement { name: "Очень_длинное_название_файла_для_проверки_элайда.jpg"; size: "1.2 MB"; error: false; processing: false }
     }
 
     function logFileOrder() {
@@ -121,7 +121,11 @@ Item {
                 highlighted: true
                 onClicked: fileDialog.open()
             }
+
+
+
         }
+
 
         GridView {
             id: fileGrid
@@ -145,6 +149,39 @@ Item {
 
             move: Transition { NumberAnimation { properties: "x,y"; duration: 200; easing.type: Easing.OutQuad } }
             displaced: Transition { NumberAnimation { properties: "x,y"; duration: 200; easing.type: Easing.OutQuad } }
+
+            Column {
+                id: emptyState
+                anchors.centerIn: parent
+                spacing: 15
+                // Отображаем, только если в модели 0 элементов и сейчас не идет перетаскивание
+                visible: visualModel.items.count === 0 && !dropZoneLogic.containsDrag
+                opacity: 0.5
+
+                Text {
+                    text: "📥"
+                    font.pixelSize: 80
+                    anchors.horizontalCenter: parent.horizontalCenter
+                }
+
+                Text {
+                    text: "Перетащите файлы сюда"
+                    font.pixelSize: 20
+                    font.bold: true
+                    color: "#2c3e50"
+                    anchors.horizontalCenter: parent.horizontalCenter
+                }
+
+                Text {
+                    text: "или используйте кнопку «Добавить файлы»"
+                    font.pixelSize: 14
+                    color: "#7f8c8d"
+                    anchors.horizontalCenter: parent.horizontalCenter
+                }
+            }
+
+
+
         }
 
         ServiceFooter {
@@ -161,41 +198,41 @@ Item {
     }
 
     Rectangle {
-            id: dropOverlay
-            // Позиционирование относительно fileGrid
-            x: fileGrid.x + 20
-            y: fileGrid.y + 20
-            width: fileGrid.width
-            height: fileGrid.height
+        id: dropOverlay
+        // Позиционирование относительно fileGrid
+        x: fileGrid.x + 20
+        y: fileGrid.y + 20
+        width: fileGrid.width
+        height: fileGrid.height
 
-            z: 100
-            radius: 10
+        z: 100
+        radius: 10
 
-            // Прямое обращение к ID DropZone для исключения ReferenceError
-            visible: dropZoneLogic.containsDrag && dropZoneLogic.isFileDrag
-            color: dropZoneLogic.invalidCount > 0 ? "#f39c12" : "#3498db"
-            opacity: 0.2
+        // Прямое обращение к ID DropZone для исключения ReferenceError
+        visible: dropZoneLogic.containsDrag && dropZoneLogic.isFileDrag
+        color: dropZoneLogic.invalidCount > 0 ? "#f39c12" : "#3498db"
+        opacity: 0.2
 
-            border.color: dropZoneLogic.invalidCount > 0 ? "#f39c12" : "#3498db"
-            border.width: 4
+        border.color: dropZoneLogic.invalidCount > 0 ? "#f39c12" : "#3498db"
+        border.width: 4
 
-            Column {
-                anchors.centerIn: parent
-                spacing: 15
-                Text {
-                    text: dropZoneLogic.invalidCount > 0 ? "⚠️" : "📥"
-                    font.pixelSize: 60
-                    anchors.horizontalCenter: parent.horizontalCenter
-                }
-                Text {
-                    text: dropZoneLogic.invalidCount > 0
-                        ? "Будет добавлено " + dropZoneLogic.validCount + " файл(ов). " + dropZoneLogic.invalidCount + " пропущено."
-                        : "Отпустите для добавления " + dropZoneLogic.validCount + " файл(ов)"
-                    font.pixelSize: 18
-                    font.bold: true
-                    color: dropZoneLogic.invalidCount > 0 ? "#e67e22" : "#2980b9"
-                    anchors.horizontalCenter: parent.horizontalCenter
-                }
+        Column {
+            anchors.centerIn: parent
+            spacing: 15
+            Text {
+                text: dropZoneLogic.invalidCount > 0 ? "⚠️" : "📥"
+                font.pixelSize: 60
+                anchors.horizontalCenter: parent.horizontalCenter
+            }
+            Text {
+                text: dropZoneLogic.invalidCount > 0
+                      ? "Будет добавлено " + dropZoneLogic.validCount + " файл(ов). " + dropZoneLogic.invalidCount + " пропущено."
+                      : "Отпустите для добавления " + dropZoneLogic.validCount + " файл(ов)"
+                font.pixelSize: 18
+                font.bold: true
+                color: dropZoneLogic.invalidCount > 0 ? "#e67e22" : "#2980b9"
+                anchors.horizontalCenter: parent.horizontalCenter
             }
         }
+    }
 }
