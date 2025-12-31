@@ -10,6 +10,9 @@ QtObject {
     readonly property string iconWarning: "⚠️"
     readonly property string iconSuccess: "✅"
     readonly property string iconError: "❌"
+    readonly property string iconImagesToPdf: "🖼️"
+    readonly property string iconMergePdf: "📚"
+    readonly property string iconEdit: "📝"
 
     readonly property color primary: "#3498db"       // Основной синий
     readonly property color primaryDark: "#2980b9"   // Синий при нажатии

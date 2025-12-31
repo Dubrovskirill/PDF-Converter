@@ -10,5 +10,6 @@
         <file>qmldir</file>
         <file>components/ToolButton.qml</file>
         <file>components/PrimaryButton.qml</file>
+        <file>components/ServiceButton.qml</file>
     </qresource>
 </RCC>

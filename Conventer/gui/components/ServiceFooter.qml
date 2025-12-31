@@ -108,7 +108,7 @@ Rectangle {
 
             background: Rectangle {
                 color: mainActionButton.pressed ? Style.primaryDark :
-                       (mainActionButton.hovered ? "#4aa3df" : Style.primary)
+                       (mainActionButton.hovered ?Qt.lighter(Style.primary, 1.1) : Style.primary)
                 radius: Style.radius
 
                 Behavior on color { ColorAnimation { duration: 150 } }

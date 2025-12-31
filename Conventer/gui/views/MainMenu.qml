@@ -1,42 +1,68 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
+import "../components"
+import ".."
 
 Item {
     id: root
     signal serviceSelected(string serviceType)
 
+    Rectangle {
+        anchors.fill: parent
+        color: Style.bgLight
+        z: -1
+    }
+
     ColumnLayout {
         anchors.centerIn: parent
-        spacing: 20
+        spacing: 40
 
-        Text {
-            text: "PDF Converter"
-            font.pixelSize: 32
-            font.bold: true
+        // Заголовок
+        ColumnLayout {
+            spacing: 12
             Layout.alignment: Qt.AlignHCenter
-            bottomPadding: 20
+
+            Text {
+                text: "PDF Converter"
+                font.pixelSize: 42
+                font.bold: true
+                color: Style.textMain
+                Layout.alignment: Qt.AlignHCenter
+            }
+
+            Rectangle {
+                Layout.preferredWidth: 80
+                Layout.preferredHeight: 4
+                color: Style.primary
+                radius: 2
+                Layout.alignment: Qt.AlignHCenter
+            }
         }
 
-        Button {
-            text: "Картинки в PDF"
-            Layout.preferredWidth: 250
-            Layout.preferredHeight: 60
-            onClicked: root.serviceSelected("imagesToPdf")
-        }
+        // Список сервисов
+        ColumnLayout {
+            spacing: 15
+            Layout.alignment: Qt.AlignHCenter
 
-        Button {
-            text: "Объединить PDF"
-            Layout.preferredWidth: 250
-            Layout.preferredHeight: 60
-            onClicked: root.serviceSelected("allToPdf")
-        }
+            ServiceButton {
+                text: "Картинки в PDF"
+                iconSymbol: Style.iconImagesToPdf
+                onClicked: root.serviceSelected("imagesToPdf")
+            }
 
-        Button {
-            text: "Редактирование (Заглушка)"
-            enabled: false
-            Layout.preferredWidth: 250
-            Layout.preferredHeight: 60
+            ServiceButton {
+                text: "Объединить PDF"
+                iconSymbol: Style.iconMergePdf
+                onClicked: root.serviceSelected("allToPdf")
+            }
+
+            ServiceButton {
+                text: "Редактирование"
+                iconSymbol: Style.iconEdit
+                enabled: false
+                opacity: 0.5
+            }
         }
     }
 }
