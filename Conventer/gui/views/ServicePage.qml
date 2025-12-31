@@ -4,6 +4,8 @@ import QtQuick.Layouts 1.15
 import QtQuick.Dialogs 1.3
 import QtQml.Models 2.15
 import "../components"
+import ".."
+
 
 Item {
     id: root
@@ -41,7 +43,7 @@ Item {
         var data = []
         for (var i = 0; i < filesModel.count; i++) {
             var item = filesModel.get(i)
-            // Создаем простой JS объект
+
             data.push({
                           "name": item.name,
                           "size": item.size,
@@ -51,7 +53,7 @@ Item {
         }
 
         data.sort(function(a, b) {
-            // localeCompare отлично работает с русским языком
+
             var result = a.name.localeCompare(b.name);
             return root.sortAscending ? result : -result;
         })
@@ -61,7 +63,7 @@ Item {
             filesModel.append(data[j])
         }
 
-        // 2. Теперь это сработает, так как свойство объявлено выше
+
         root.sortAscending = !root.sortAscending
     }
 
@@ -120,79 +122,109 @@ Item {
         anchors.margins: 20
         spacing: 10
 
+        // --- ПЕРВАЯ СТРОКА ---
         RowLayout {
             Layout.fillWidth: true
-            Button {
-                text: "<- Назад"
+            spacing: 15
+
+            ToolButton {
+                text: "← Назад"
                 onClicked: root.backRequested()
             }
 
             Text {
                 text: root.title
-                font.pixelSize: 24
-                font.bold: true
-                Layout.leftMargin: 10
+                font.pixelSize: 24; font.bold: true
+                color: Style.textMain
+                Layout.fillWidth: true
             }
 
+            PrimaryButton {
+                text: "Добавить файлы"
+                iconText: "+"
+                onClicked: fileDialog.open()
+            }
+        }
+
+        // --- ВТОРАЯ СТРОКА ---
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 20
+            visible: filesModel.count > 0
+
+
+            RowLayout {
+                id: mergeControl
+                spacing: 8
+                visible: root.title === "Картинки в PDF"
+                Layout.alignment: Qt.AlignVCenter
+
+
+                property bool isHovered: mouseAreaMerge.containsMouse
+
+                CheckBox {
+                    id: mergeCheck
+                    checked: false
+                    padding: 0
+                    hoverEnabled: false
+                    Layout.alignment: Qt.AlignVCenter
+
+                    indicator: Rectangle {
+                        implicitWidth: 18
+                        implicitHeight: 18
+                        radius: 4
+
+                        anchors.verticalCenter: parent.verticalCenter
+
+                        color: mergeCheck.checked ? Style.primary : "transparent"
+                        border.color: mergeCheck.checked ? Style.primary :
+                                                           mergeControl.isHovered ? Style.primary : Style.borderDefault
+                        border.width: 1
+
+                        Behavior on border.color { ColorAnimation { duration: 150 } }
+                        Behavior on color { ColorAnimation { duration: 150 } }
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: "✓"
+                            color: "white"
+                            visible: mergeCheck.checked
+                            font.pixelSize: 12
+                            font.bold: true
+                        }
+                    }
+                }
+
+                Text {
+                    text: "Объединить в один PDF"
+                    font.pixelSize: 13
+                    Layout.alignment: Qt.AlignVCenter
+                    color: mergeControl.isHovered || mergeCheck.checked ? Style.primary : Style.textSecondary
+
+                    Behavior on color { ColorAnimation { duration: 150 } }
+                }
+
+                MouseArea {
+                    id: mouseAreaMerge
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: mergeCheck.checked = !mergeCheck.checked
+                }
+            }
 
             Item { Layout.fillWidth: true }
 
-            Button {
-                text: "+ Добавить файлы"
-                highlighted: true
-                onClicked: fileDialog.open()
-            }
-
-
-
-        }
-        RowLayout {
-            Layout.fillWidth: true
-            visible: filesModel.count > 1 // Показываем только если есть что сортировать
-
-            Button {
+            ToolButton {
+                text: root.sortAscending ? "Имя A-Z ↓" : "Имя Z-A ↑"
                 visible: filesModel.count > 1
-                text: root.sortAscending ? "Сортировать: А-Я" : "Сортировать: Я-А"
                 onClicked: sortModel()
-
-                // Добавим иконку для наглядности
-                contentItem: Text {
-                    text: parent.text + (root.sortAscending ? " ↓" : " ↑")
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                    color: "#2c3e50"
-                }
             }
 
-            Button {
-                text: "Очистить всё"
-
-                visible: filesModel.count > 0
-
-                contentItem: Text {
-                    text: parent.text
-                    color: "red"
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                }
-
-                onClicked: {
-                    console.log("QML: Clearing all files from model")
-                    filesModel.clear()
-                }
-            }
-
-            RowLayout {
-                visible: root.title === "Картинки в PDF"
-                spacing: 10
-                Layout.leftMargin: 20
-                CheckBox { id: mergeCheck; checked: false; text: ""; implicitWidth: 30 }
-                Text {
-                    text: "Объединить в один PDF"
-                    font.pixelSize: 14
-                    color: "#333"
-                    MouseArea { anchors.fill: parent; onClicked: mergeCheck.checked = !mergeCheck.checked }
-                }
+            ToolButton {
+                text: "Очистить список"
+                hoverColor: Style.danger
+                onClicked: filesModel.clear()
             }
         }
 
@@ -204,7 +236,7 @@ Item {
             cellHeight: 220
             clip: true
 
-            // Пробрасываем ID наружу для оверлея
+
             property alias dropZoneId: dropZoneLogic
 
             DropZone {
@@ -224,7 +256,7 @@ Item {
                 id: emptyState
                 anchors.centerIn: parent
                 spacing: 15
-                // Отображаем, только если в модели 0 элементов и сейчас не идет перетаскивание
+
                 visible: visualModel.items.count === 0 && !dropZoneLogic.containsDrag
                 opacity: 0.5
 
@@ -269,7 +301,7 @@ Item {
 
     Rectangle {
         id: dropOverlay
-        // Позиционирование относительно fileGrid
+
         x: fileGrid.x + 20
         y: fileGrid.y + 20
         width: fileGrid.width
@@ -278,7 +310,7 @@ Item {
         z: 100
         radius: 10
 
-        // Прямое обращение к ID DropZone для исключения ReferenceError
+
         visible: dropZoneLogic.containsDrag && dropZoneLogic.isFileDrag
         color: dropZoneLogic.invalidCount > 0 ? "#f39c12" : "#3498db"
         opacity: 0.2
