@@ -14,7 +14,8 @@ Item {
     signal backRequested()
     property bool sortAscending: true
 
-
+    property real progress: 0.0
+    property string statusText: "Готов к работе"
     readonly property var imgExts: ["jpg", "jpeg", "png"]
     readonly property var pdfExts: ["pdf"]
     readonly property var allExts: imgExts.concat(pdfExts)
@@ -289,12 +290,20 @@ Item {
         ServiceFooter {
             id: serviceFooter
             Layout.fillWidth: true
-            actionText: root.title === "Картинки в PDF" ? "Convert to PDF" : "Merge PDF"
-            isFinished: progress >= 1.0
+            actionText: root.title === "Картинки в PDF" ? "Конвертировать" : "Объединить"
+            progress: root.progress
+            statusText: root.statusText
+            isFinished: root.progress >= 1.0
+
             onActionClicked: {
-                root.logFileOrder();
-                progress = 1.0;
-                statusText = "Completed!";
+                root.statusText = "Обработка..."
+
+                root.progress = 1.0
+                root.statusText = "Готово!"
+            }
+
+            onOpenFolderClicked: {
+                console.log("Открываем папку с результатом...")
             }
         }
     }
