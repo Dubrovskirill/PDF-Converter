@@ -2,6 +2,7 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 import QtQml.Models 2.15
+import ".." // Явный импорт, чтобы увидеть Style.qml
 
 Item {
     id: root
@@ -22,8 +23,15 @@ Item {
         id: cardRoot
         width: 160
         height: 200
-        color: "white"
-        radius: 10
+        color: Style.bgMain
+        radius: Style.radius
+
+
+        border.width: 1
+        border.color: (mouseArea.containsMouse || mouseArea.drag.active || removeButton.hovered)
+                      ? Style.borderHover
+                      : Style.borderDefault
+
 
         Drag.active: mouseArea.drag.active
         Drag.source: root
@@ -34,8 +42,13 @@ Item {
         states: [
             State {
                 when: mouseArea.drag.active
-                ParentChange { target: cardRoot; parent: fileGrid } // Чтобы летала над всем GridView
-                PropertyChanges { target: cardRoot; opacity: 0.8; scale: 1.1; z: 1000 }
+                ParentChange { target: cardRoot; parent: fileGrid }
+                PropertyChanges {
+                    target: cardRoot;
+                    opacity: 0.8;
+                    scale: 1.1;
+                    z: 1000
+                }
             }
         ]
 
@@ -47,7 +60,7 @@ Item {
             Rectangle {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                color: "#f8f9fa"
+                color: Style.bgLight
                 radius: 6
                 clip: true
 
@@ -61,13 +74,11 @@ Item {
 
                 Text {
                     anchors.centerIn: parent
-                    text: "📄"
+                    text: Style.iconFile
                     font.pixelSize: 40
                     opacity: 0.2
                     visible: previewSource === ""
                 }
-
-
 
                 BusyIndicator {
                     anchors.centerIn: parent
@@ -81,6 +92,7 @@ Item {
                 text: fileName
                 font.pixelSize: 12
                 font.bold: true
+                color: Style.textMain
                 elide: Text.ElideRight
                 horizontalAlignment: Text.AlignHCenter
             }
@@ -89,7 +101,7 @@ Item {
                 Layout.fillWidth: true
                 text: isError ? "Ошибка" : fileSize
                 font.pixelSize: 10
-                color: isError ? "red" : "#888"
+                color: isError ? Style.danger : Style.textSecondary
                 horizontalAlignment: Text.AlignHCenter
             }
         }
@@ -106,6 +118,8 @@ Item {
                 }
             }
         }
+
+
         Button {
             id: removeButton
             anchors.top: parent.top
@@ -114,24 +128,23 @@ Item {
             width: 24; height: 24
             z: 2
 
-           visible: (mouseArea.containsMouse || hovered) && !mouseArea.drag.active
+            visible: (mouseArea.containsMouse || hovered) && !mouseArea.drag.active
 
             background: Rectangle {
                 radius: 12
-                color: removeButton.hovered ? "#f4f4f4" : "white"
-                border.color: "#ddd"
+                color: removeButton.hovered ? Style.bgLight : Style.bgMain
+                border.color: Style.borderDefault
             }
             contentItem: Text {
-                text: "✕"; color: "red";
+                text: Style.iconDelete
+                color: Style.danger
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
             }
             onClicked: {
-                console.log("QML: Clicked remove button on card:", fileName) // Лог для проверки
+                console.log("QML: Clicked remove button on card:", fileName)
                 root.removeClicked()
             }
         }
     }
-
-
 }
