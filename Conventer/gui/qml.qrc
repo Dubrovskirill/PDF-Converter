@@ -6,5 +6,7 @@
         <file>components/FileCard.qml</file>
         <file>components/DropZone.qml</file>
         <file>components/ServiceFooter.qml</file>
+        <file>Style.qml</file>
+        <file>qmldir</file>
     </qresource>
 </RCC>
