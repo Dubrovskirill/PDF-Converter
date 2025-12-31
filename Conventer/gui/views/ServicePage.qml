@@ -12,8 +12,19 @@ Item {
     signal backRequested()
     property bool sortAscending: true
 
-    property var imageFilters: ["Image files (*.jpg *.jpeg *.png)"]
-    property var allFilesFilters: ["All supported (*.jpg *.jpeg *.png *.pdf)", "Image files (*.jpg *.jpeg *.png)", "PDF files (*.pdf)"]
+
+    readonly property var imgExts: ["jpg", "jpeg", "png"]
+    readonly property var pdfExts: ["pdf"]
+    readonly property var allExts: imgExts.concat(pdfExts)
+
+    property var imageFilters: ["Image files (*." + imgExts.join(" *.") + ")"]
+    property var allFilesFilters: [
+        "All supported (*." + allExts.join(" *.") + ")",
+        "Image files (*." + imgExts.join(" *.") + ")",
+        "PDF files (*." + pdfExts.join(" *.") + ")"
+    ]
+    readonly property var currentAllowedExts: title === "Картинки в PDF" ? imgExts : allExts
+
 
     ListModel {
         id: filesModel
@@ -200,6 +211,7 @@ Item {
                 id: dropZoneLogic
                 anchors.fill: parent
                 z: -1
+                allowedExtensions: root.currentAllowedExts
             }
 
             model: visualModel

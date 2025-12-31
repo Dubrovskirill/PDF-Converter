@@ -11,9 +11,7 @@ DropArea {
     property int validCount: 0
     property int invalidCount: 0
 
-    readonly property var allowedExtensions: root.title === "Картинки в PDF"
-                                             ? ["jpg", "jpeg", "png"]
-                                             : ["jpg", "jpeg", "png", "pdf"]
+    property var allowedExtensions: []
 
     function processUrls(urls, executeAdd) {
         var accepted = [];
