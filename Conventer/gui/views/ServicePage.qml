@@ -10,6 +10,8 @@ Item {
 
     property string title: "Service"
     signal backRequested()
+    property bool sortAscending: true
+
     property var imageFilters: ["Image files (*.jpg *.jpeg *.png)"]
     property var allFilesFilters: ["All supported (*.jpg *.jpeg *.png *.pdf)", "Image files (*.jpg *.jpeg *.png)", "PDF files (*.pdf)"]
 
@@ -23,13 +25,33 @@ Item {
         ListElement { name: "Очень_длинное_название_файла_для_проверки_элайда.jpg"; size: "1.2 MB"; error: false; processing: false }
     }
 
-    function logFileOrder() {
-        console.log("--- Current File Order (Internal) ---");
-        for (var i = 0; i < visualModel.items.count; i++) {
-            var item = visualModel.items.get(i).model;
-            console.log(i + ": " + item.name);
+
+    function sortModel() {
+        var data = []
+        for (var i = 0; i < filesModel.count; i++) {
+            var item = filesModel.get(i)
+            // Создаем простой JS объект
+            data.push({
+                          "name": item.name,
+                          "size": item.size,
+                          "error": item.error,
+                          "processing": item.processing
+                      })
         }
-        console.log("-------------------------------------");
+
+        data.sort(function(a, b) {
+            // localeCompare отлично работает с русским языком
+            var result = a.name.localeCompare(b.name);
+            return root.sortAscending ? result : -result;
+        })
+
+        filesModel.clear()
+        for (var j = 0; j < data.length; j++) {
+            filesModel.append(data[j])
+        }
+
+        // 2. Теперь это сработает, так как свойство объявлено выше
+        root.sortAscending = !root.sortAscending
     }
 
     DelegateModel {
@@ -85,7 +107,7 @@ Item {
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: 20
-        spacing: 20
+        spacing: 10
 
         RowLayout {
             Layout.fillWidth: true
@@ -101,20 +123,36 @@ Item {
                 Layout.leftMargin: 10
             }
 
-            RowLayout {
-                visible: root.title === "Картинки в PDF"
-                spacing: 10
-                Layout.leftMargin: 20
-                CheckBox { id: mergeCheck; checked: false; text: ""; implicitWidth: 30 }
-                Text {
-                    text: "Объединить в один PDF"
-                    font.pixelSize: 14
-                    color: "#333"
-                    MouseArea { anchors.fill: parent; onClicked: mergeCheck.checked = !mergeCheck.checked }
+
+            Item { Layout.fillWidth: true }
+
+            Button {
+                text: "+ Добавить файлы"
+                highlighted: true
+                onClicked: fileDialog.open()
+            }
+
+
+
+        }
+        RowLayout {
+            Layout.fillWidth: true
+            visible: filesModel.count > 1 // Показываем только если есть что сортировать
+
+            Button {
+                visible: filesModel.count > 1
+                text: root.sortAscending ? "Сортировать: А-Я" : "Сортировать: Я-А"
+                onClicked: sortModel()
+
+                // Добавим иконку для наглядности
+                contentItem: Text {
+                    text: parent.text + (root.sortAscending ? " ↓" : " ↑")
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                    color: "#2c3e50"
                 }
             }
 
-            Item { Layout.fillWidth: true }
             Button {
                 text: "Очистить всё"
 
@@ -132,16 +170,20 @@ Item {
                     filesModel.clear()
                 }
             }
-            Button {
-                text: "+ Добавить файлы"
-                highlighted: true
-                onClicked: fileDialog.open()
+
+            RowLayout {
+                visible: root.title === "Картинки в PDF"
+                spacing: 10
+                Layout.leftMargin: 20
+                CheckBox { id: mergeCheck; checked: false; text: ""; implicitWidth: 30 }
+                Text {
+                    text: "Объединить в один PDF"
+                    font.pixelSize: 14
+                    color: "#333"
+                    MouseArea { anchors.fill: parent; onClicked: mergeCheck.checked = !mergeCheck.checked }
+                }
             }
-
-
-
         }
-
 
         GridView {
             id: fileGrid
