@@ -18,7 +18,6 @@ Item {
         anchors.centerIn: parent
         spacing: 40
 
-        // Заголовок
         ColumnLayout {
             spacing: 12
             Layout.alignment: Qt.AlignHCenter
@@ -40,7 +39,6 @@ Item {
             }
         }
 
-        // Список сервисов
         ColumnLayout {
             spacing: 15
             Layout.alignment: Qt.AlignHCenter

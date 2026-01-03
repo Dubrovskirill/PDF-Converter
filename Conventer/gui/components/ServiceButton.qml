@@ -8,13 +8,12 @@ Button {
 
     property string iconSymbol: ""
 
-    // Оставляем крупные размеры карточки
+
     implicitWidth: 320
     implicitHeight: 100
 
     contentItem: RowLayout {
-        // Убираем anchors.fill, чтобы не было зацикливания высоты
-        // Используем встроенное позиционирование RowLayout внутри кнопки
+
         spacing: 20
         Layout.alignment: Qt.AlignVCenter
 
@@ -43,7 +42,7 @@ Button {
         border.color: control.hovered ? Style.primary : Style.borderDefault
         border.width: control.hovered ? 2 : 1
 
-        // Мягкая подсветка (тень) при наведении
+
         layer.enabled: control.hovered
 
         Behavior on border.color { ColorAnimation { duration: 150 } }

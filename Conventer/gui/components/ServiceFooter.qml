@@ -90,7 +90,7 @@ Rectangle {
 
 
                         verticalAlignment: Text.AlignVCenter
-                        renderType: Text.NativeRendering
+                        renderType: Text.QtRendering
                     }
 
                     Text {
