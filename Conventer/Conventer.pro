@@ -61,7 +61,8 @@ HEADERS += \
     src/infrastructure/MergeTask.h \
     src/infrastructure/RenderTask.h \
     src/infrastructure/TaskQueueManager.h \
-    src/infrastructure/TaskSignals.h
+    src/infrastructure/TaskSignals.h \
+    src/viewmodel/FileItem.h
 
 RESOURCES += gui/qml.qrc
 QML_IMPORT_PATH = gui
