@@ -46,7 +46,8 @@ SOURCES += \
     src/test/TestAsyncTasks.cpp \
     src/test/TestPdfRenderer.cpp \
     src/test/TestQPdfMerger.cpp \
-    src/test/TestQtImageConverter.cpp
+    src/test/TestQtImageConverter.cpp \
+    src/viewmodel/PdfFileModel.cpp
 
 HEADERS += \
     src/core/QPdfMerger.h \
@@ -62,7 +63,8 @@ HEADERS += \
     src/infrastructure/RenderTask.h \
     src/infrastructure/TaskQueueManager.h \
     src/infrastructure/TaskSignals.h \
-    src/viewmodel/FileItem.h
+    src/viewmodel/FileItem.h \
+    src/viewmodel/PdfFileModel.h
 
 RESOURCES += gui/qml.qrc
 QML_IMPORT_PATH = gui
