@@ -35,8 +35,6 @@ public:
         return allOk;
     }
 
-private:
-    // Внутренний метод, инкапсулирующий логику отрисовки
     bool saveToPdf(const QString &src, const QString &dest) {
         QImage img(src);
         if (img.isNull()) return false;
