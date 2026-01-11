@@ -1,4 +1,5 @@
 #include "PdfFileModel.h"
+#include "qdatetime.h"
 #include <QFileInfo>
 #include <QUrl>
 #include <QDebug>
@@ -27,9 +28,9 @@ QVariant PdfFileModel::data(const QModelIndex &index, int role) const {
     case FileSizeRole:
         return item.fileSize;
     case PreviewRole:
-        // Формируем URL для ImageProvider.
-        // Добавляем флаг времени или индекс, чтобы QML обновлял картинку при изменении
-        return QString("image://previews/%1").arg(index.row());
+        return QString("image://previews/%1?t=%2")
+            .arg(index.row())
+            .arg(QDateTime::currentMSecsSinceEpoch());
     case IsProcessingRole:
         return item.isProcessing;
     case IsErrorRole:
@@ -96,7 +97,7 @@ void PdfFileModel::addFile(const QString &filePath) {
 
     FileItem item;
     item.filePath = filePath;
-    item.fileName = generateUniqueName(info.fileName());
+    item.fileName = info.fileName();
     item.fileSize = formatSize(info.size());
     item.isProcessing = false;
     item.isError = false;
@@ -187,4 +188,15 @@ QImage PdfFileModel::getPreviewImage(int index) const {
         return QImage();
     }
     return m_files.at(index).preview;
+}
+
+
+void PdfFileModel::updatePreviewByIndex(int index, const QImage &image) {
+    if (index < 0 || index >= m_files.count()) return;
+
+    m_files[index].preview = image;
+
+    // Сообщаем QML, что данные именно этого индекса изменились
+    QModelIndex idx = this->index(index);
+    emit dataChanged(idx, idx, {PreviewRole});
 }

@@ -14,8 +14,9 @@ Item {
     signal backRequested()
     property bool sortAscending: true
 
-    property real progress: 0.0
-    property string statusText: "Готов к работе"
+    property real progress: converterVM.progress
+    property string statusText: converterVM.statusText
+
     readonly property var imgExts: ["jpg", "jpeg", "png"]
     readonly property var pdfExts: ["pdf"]
     readonly property var allExts: imgExts.concat(pdfExts)
@@ -29,61 +30,32 @@ Item {
     readonly property var currentAllowedExts: title === "Картинки в PDF" ? imgExts : allExts
 
 
-    ListModel {
-        id: filesModel
-        ListElement { name: "Летний_отпуск_01.jpg"; size: "2.4 MB"; error: false; processing: false }
-        ListElement { name: "Документ_со_сканера.pdf"; size: "15.1 MB"; error: false; processing: false }
-        ListElement { name: "Ошибка_загрузки.png"; size: "0 KB"; error: true; processing: false }
-        ListElement { name: "Обработка_фото.jpg"; size: "4.2 MB"; error: false; processing: true }
-        ListElement { name: "Презентация.pdf"; size: "8.7 MB"; error: false; processing: false }
-        ListElement { name: "Очень_длинное_название_файла_для_проверки_элайда.jpg"; size: "1.2 MB"; error: false; processing: false }
-    }
-
-
     function sortModel() {
-        var data = []
-        for (var i = 0; i < filesModel.count; i++) {
-            var item = filesModel.get(i)
+        // Вызываем C++ метод
+        converterVM.sortByName(root.sortAscending)
 
-            data.push({
-                          "name": item.name,
-                          "size": item.size,
-                          "error": item.error,
-                          "processing": item.processing
-                      })
-        }
-
-        data.sort(function(a, b) {
-
-            var result = a.name.localeCompare(b.name);
-            return root.sortAscending ? result : -result;
-        })
-
-        filesModel.clear()
-        for (var j = 0; j < data.length; j++) {
-            filesModel.append(data[j])
-        }
-
-
+        // Переключаем флаг для следующего нажатия
         root.sortAscending = !root.sortAscending
     }
 
     DelegateModel {
         id: visualModel
-        model: filesModel
+        model: fileModel
         delegate: FileCard {
             id: delegateItem
-            fileName: model.name
-            fileSize: model.size
-            isError: model.error
-            isProcessing: model.processing
+            // ИСПОЛЬЗУЕМ РОЛИ ИЗ C++ (PdfFileModel.cpp):
+            fileName: model.fileName
+            fileSize: model.fileSize
+            isError: model.isError
+            isProcessing: model.isProcessing
+            previewSource: model.previewSource
 
             width: fileGrid.cellWidth
             height: fileGrid.cellHeight
 
             onRemoveClicked: {
-                console.log("Removing item at index:", index)
-                filesModel.remove(index)
+                // ВЫЗОВ C++:
+                converterVM.removeFile(index)
             }
 
             DropArea {
@@ -95,7 +67,8 @@ Item {
                         var from = drag.source.visualIndex;
                         var to = delegateItem.DelegateModel.itemsIndex;
                         if (from !== to) {
-                            visualModel.items.move(from, to);
+
+                            converterVM.moveFile(from, to)
                         }
                     }
                 }
@@ -105,16 +78,14 @@ Item {
 
     FileDialog {
         id: fileDialog
-        title: "Please choose files"
+        title: "Выберите файлы"
         folder: shortcuts.pictures
         selectMultiple: true
         nameFilters: root.title === "Картинки в PDF" ? imageFilters : allFilesFilters
 
         onAccepted: {
-            console.log("Selected files from dialog:")
-            for (var i = 0; i < fileUrls.length; i++) {
-                console.log("- " + fileUrls[i])
-            }
+
+            converterVM.addFiles(fileUrls)
         }
     }
 
@@ -130,7 +101,10 @@ Item {
 
             ToolButton {
                 text: "← Назад"
-                onClicked: root.backRequested()
+                onClicked: {
+                        converterVM.clearList()
+                        root.backRequested()
+                    }
             }
 
             Text {
@@ -151,7 +125,7 @@ Item {
         RowLayout {
             Layout.fillWidth: true
             spacing: 20
-            visible: filesModel.count > 0
+            visible: visualModel.items.count > 0
 
 
             RowLayout {
@@ -169,7 +143,9 @@ Item {
                     padding: 0
                     hoverEnabled: false
                     Layout.alignment: Qt.AlignVCenter
-
+                    onCheckedChanged: {
+                            converterVM.resetProcessingStatus()
+                        }
                     indicator: Rectangle {
                         implicitWidth: 18
                         implicitHeight: 18
@@ -218,14 +194,14 @@ Item {
 
             ToolButton {
                 text: root.sortAscending ? "Имя A-Z ↓" : "Имя Z-A ↑"
-                visible: filesModel.count > 1
+                visible: visualModel.items.count > 1
                 onClicked: sortModel()
             }
 
             ToolButton {
                 text: "Очистить список"
                 hoverColor: Style.danger
-                onClicked: filesModel.clear()
+                onClicked: converterVM.clearList()
             }
         }
 
@@ -291,19 +267,18 @@ Item {
             id: serviceFooter
             Layout.fillWidth: true
             actionText: root.title === "Картинки в PDF" ? "Конвертировать" : "Объединить"
-            progress: root.progress
-            statusText: root.statusText
-            isFinished: root.progress >= 1.0
+            progress: converterVM.progress
+            statusText: converterVM.statusText
+            isFinished: converterVM.isFinished
 
             onActionClicked: {
-                root.statusText = "Обработка..."
+                var serviceType = (root.title === "Картинки в PDF") ? "imagesToPdf" : "allToPdf"
 
-                root.progress = 1.0
-                root.statusText = "Готово!"
+                converterVM.runConversion(serviceType, mergeCheck.checked)
             }
 
             onOpenFolderClicked: {
-                console.log("Открываем папку с результатом...")
+                converterVM.openResultFolder()
             }
         }
     }

@@ -43,6 +43,11 @@ public:
 
     // 3. Работа с результатом
     Q_INVOKABLE void openResultFolder();
+    Q_INVOKABLE void sortByName(bool ascending);
+
+
+    Q_INVOKABLE void resetProcessingStatus();
+
 
 signals:
     void progressChanged();
@@ -54,9 +59,12 @@ signals:
 private:
     // Внутренние методы для запуска фоновых задач
     void startRendering(const QString &filePath);
+    void startRenderingForIndex(const QString &filePath, int index);
     void finalizeOperation(const QString &resultPath);
     QString generateUniqueOutputPath(const QString &baseName);
+    void resetStatus();
 
+    QVector<QFileInfo> m_files;
     PdfFileModel *m_fileModel;
 
     float m_progress;

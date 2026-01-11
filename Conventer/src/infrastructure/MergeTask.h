@@ -26,6 +26,7 @@ public:
             emit m_signals->finished(m_destFile);
         } else {
             emit m_signals->error("Ошибка при объединении PDF файлов");
+            emit m_signals->finished("");
         }
     }
 

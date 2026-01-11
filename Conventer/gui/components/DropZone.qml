@@ -5,7 +5,6 @@ DropArea {
     id: dropArea
     anchors.fill: parent
 
-    // Эти свойства мы будем считывать снаружи для показа подсветки
     property bool containsDrag: false
     property bool isFileDrag: false
     property int validCount: 0
@@ -20,15 +19,16 @@ DropArea {
             var path = urls[i].toString();
             var ext = path.split('.').pop().toLowerCase();
             if (allowedExtensions.indexOf(ext) !== -1) {
-                accepted.push(path);
+                accepted.push(urls[i]); // Сохраняем как URL
             } else {
                 rejected.push(path.split('/').pop());
             }
         }
 
         if (executeAdd && accepted.length > 0) {
-            console.log("Adding files:", accepted);
-            // Здесь будет вызов C++: viewModel.addFiles(accepted)
+            // ВЫЗОВ C++:
+            // Передаем отфильтрованный список принятых файлов
+            converterVM.addFiles(accepted);
         }
 
         validCount = accepted.length;

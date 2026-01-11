@@ -4,6 +4,7 @@
 #include <QAbstractListModel>
 #include <QVector>
 #include "FileItem.h"
+#include <algorithm>
 
 class PdfFileModel : public QAbstractListModel
 {
@@ -38,6 +39,20 @@ public:
     QStringList getAllPaths() const;
     void updatePreview(const QString &path, const QImage &image);
     QImage getPreviewImage(int index) const;
+    void updatePreviewByIndex(int index, const QImage &image);
+
+    void sortData(bool ascending) {
+        if (m_files.isEmpty()) return;
+
+        beginResetModel();
+        // Используем FileItem, так как именно из них состоит m_files
+        std::sort(m_files.begin(), m_files.end(), [ascending](const FileItem &a, const FileItem &b) {
+            // Сравниваем fileName (убедитесь, что это поле public в FileItem или есть геттер)
+            int result = QString::compare(a.fileName, b.fileName, Qt::CaseInsensitive);
+            return ascending ? (result < 0) : (result > 0);
+        });
+        endResetModel();
+    }
 
 private:
     QVector<FileItem> m_files;

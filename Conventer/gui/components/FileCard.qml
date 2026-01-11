@@ -68,8 +68,9 @@ Item {
                     anchors.fill: parent
                     source: previewSource
                     fillMode: Image.PreserveAspectCrop
-                    visible: previewSource !== ""
+                    visible: status === Image.Ready && !isProcessing && !isError
                     asynchronous: true
+                    cache: false
                 }
 
                 Text {
@@ -77,7 +78,7 @@ Item {
                     text: Style.iconFile
                     font.pixelSize: 40
                     opacity: 0.2
-                    visible: previewSource === ""
+                    visible: (!isProcessing && previewSource === "") || isError
                 }
 
                 BusyIndicator {

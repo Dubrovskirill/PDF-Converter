@@ -22,6 +22,26 @@ public:
         bool success = false;
 
         try {
+            // ПРОВЕРКА 1: Создаем папку, если её нет
+            QFileInfo outFileInfo(outputFilePath);
+            QDir targetDir = outFileInfo.dir();
+            if (!targetDir.exists()) {
+                if (!targetDir.mkpath(".")) {
+                    qCritical() << "КРИТИЧЕСКАЯ ОШИБКА: Не удалось создать папку" << targetDir.path();
+                    return false;
+                }
+            }
+
+            // ПРОВЕРКА 2: Тестовое открытие файла средствами Qt (проверка на кириллицу/права доступа)
+            QFile testFile(outputFilePath);
+            if (!testFile.open(QIODevice::WriteOnly)) {
+                qCritical() << "ОШИБКА ДОСТУПА: Система не дает создать файл:" << outputFilePath;
+                qCritical() << "Причина:" << testFile.errorString();
+                                                    return false;
+            }
+            testFile.close();
+            testFile.remove(); // Удаляем пустышку перед работой QPDF
+
             QPDF combinedPdf;
             combinedPdf.emptyPDF();
 
@@ -41,7 +61,8 @@ public:
 
                 if (!pdfToProcess.isEmpty() && QFile::exists(pdfToProcess)) {
                     QPDF inputPdf;
-                    inputPdf.processFile(pdfToProcess.toStdString().c_str());
+                    // Используем Utf8 для чтения
+                    inputPdf.processFile(pdfToProcess.toUtf8().constData());
 
                     std::vector<QPDFObjectHandle> pages = inputPdf.getAllPages();
                     for (auto& page : pages) {
@@ -52,17 +73,26 @@ public:
                 }
             }
 
-            QPDFWriter writer(combinedPdf, outputFilePath.toLocal8Bit().constData());
+            // ЗАПИСЬ: Используем Utf8 (заменили toLocal8Bit на toUtf8)
+            QPDFWriter writer(combinedPdf, outputFilePath.toUtf8().constData());
             writer.setStaticID(true);
             writer.write();
-            success = true;
+
+            // ПРОВЕРКА 3: Финальная проверка, что файл физически появился
+            if (QFile::exists(outputFilePath)) {
+                success = true;
+                qDebug() << "УСПЕХ: Файл создан и проверен:" << outputFilePath;
+            } else {
+                qCritical() << "ФАНТОМНАЯ ОШИБКА: QPDF не записал файл по пути:" << outputFilePath;
+                success = false;
+            }
 
         } catch (std::exception &e) {
-            qCritical() << "Ошибка QPDF при слиянии:" << e.what();
+            qCritical() << "Исключение QPDF при слиянии:" << e.what();
+            success = false;
         }
 
         cleanup(tempFiles);
-
         return success;
     }
 

@@ -19,6 +19,7 @@ ConverterViewModel::ConverterViewModel(QObject *parent)
 {
     // Определяем папку для сохранения (Документы/PDF_Converter)
     m_lastOutputDir = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/PDF_Converter";
+    QDir().mkpath(m_lastOutputDir);
 }
 
 // --- Геттеры ---
@@ -31,13 +32,14 @@ bool ConverterViewModel::isFinished() const { return m_isFinished; }
 // --- Взаимодействие со списком ---
 void ConverterViewModel::addFiles(const QList<QUrl> &urls) {
     if (urls.isEmpty()) return;
-
+    resetStatus();
     for (const QUrl &url : urls) {
         QString path = url.toLocalFile();
         if (path.isEmpty()) path = url.toString(); // Обработка путей в зависимости от ОС
 
         m_fileModel->addFile(path);
-        startRendering(path); // Запускаем создание превью сразу при добавлении
+        int newIndex = m_fileModel->rowCount() - 1;
+        startRenderingForIndex(path, newIndex);
     }
 
     m_isFinished = false;
@@ -48,14 +50,17 @@ void ConverterViewModel::addFiles(const QList<QUrl> &urls) {
 
 void ConverterViewModel::removeFile(int index) {
     m_fileModel->removeFile(index);
+    resetStatus();
 }
 
 void ConverterViewModel::moveFile(int from, int to) {
     m_fileModel->moveRow(from, to);
+    resetStatus();
 }
 
 void ConverterViewModel::clearList() {
     m_fileModel->clearAll();
+    resetStatus();
     m_isFinished = false;
     m_progress = 0;
     m_isProcessing = false;
@@ -67,6 +72,8 @@ void ConverterViewModel::clearList() {
 // --- Основная логика конвертации ---
 void ConverterViewModel::runConversion(const QString &serviceType, bool combineToOne) {
     if (m_fileModel->rowCount() == 0) return;
+    QDir().mkpath(m_lastOutputDir);
+
 
     m_isProcessing = true;
     m_isFinished = false;
@@ -77,7 +84,7 @@ void ConverterViewModel::runConversion(const QString &serviceType, bool combineT
     emit statusTextChanged();
 
     QStringList sourceFiles = m_fileModel->getAllPaths();
-    QDir().mkpath(m_lastOutputDir);
+
 
     if (serviceType == "imagesToPdf") {
         if (combineToOne) {
@@ -94,22 +101,33 @@ void ConverterViewModel::runConversion(const QString &serviceType, bool combineT
             // Режим: Каждая картинка в отдельный PDF
             // Режим: каждая картинка в свой PDF
             QStringList targetPaths;
+            QStringList reservedNames;
             for (const QString &srcPath : sourceFiles) {
                 QFileInfo info(srcPath);
-                // Генерируем уникальное имя для каждого выходного PDF
-                QString outPath = generateUniqueOutputPath(info.completeBaseName() + ".pdf");
+                QString baseName = info.completeBaseName();
+                QString outPath = m_lastOutputDir + "/" + baseName + ".pdf";
+
+                int counter = 2;
+                // Мы проверяем не только диск (QFile::exists),
+                // но и не заняли ли мы это имя секунду назад в этом же цикле (reservedNames)
+                while (QFile::exists(outPath) || reservedNames.contains(outPath)) {
+                    outPath = QString("%1/%2_%3.pdf")
+                                  .arg(m_lastOutputDir)
+                                  .arg(baseName)
+                                  .arg(counter++);
+                }
+
                 targetPaths << outPath;
+                reservedNames << outPath; // "Бронируем" имя, чтобы следующий дубликат его не взял
             }
-
-            // Теперь передаем в задачу два списка: ЧТО конвертировать и КУДА сохранять
             ImageToPdfTask* task = new ImageToPdfTask(sourceFiles, targetPaths);
-
             connect(task->taskSignals(), &TaskSignals::progress, this, [this](int p){
                 m_progress = p / 100.0f;
                 emit progressChanged();
             });
             connect(task->taskSignals(), &TaskSignals::finished, this, &ConverterViewModel::finalizeOperation);
             TaskQueueManager::instance().startTask(task);
+
         }
     } else if (serviceType == "allToPdf") {
         // Режим: Объединение (PDF и картинки) в один файл
@@ -122,14 +140,56 @@ void ConverterViewModel::runConversion(const QString &serviceType, bool combineT
 
 // --- Вспомогательные методы ---
 void ConverterViewModel::startRendering(const QString &filePath) {
+    // Находим все вхождения этого файла (если добавили дубликаты)
+    for (int i = 0; i < m_fileModel->rowCount(); ++i) {
+        QModelIndex idx = m_fileModel->index(i);
+        if (m_fileModel->data(idx, PdfFileModel::FilePathRole).toString() == filePath) {
+            m_fileModel->setData(idx, true, PdfFileModel::IsProcessingRole);
+        }
+    }
+
     RenderTask* task = new RenderTask(filePath);
-    // Когда превью готово, обновляем его в модели
+
     connect(task->taskSignals(), &TaskSignals::resultReady, this, [this, filePath](const QImage &img){
         m_fileModel->updatePreview(filePath, img);
+
+        // После завершения рендеринга выключаем индикатор у всех карточек с этим путем
+        for (int i = 0; i < m_fileModel->rowCount(); ++i) {
+            QModelIndex idx = m_fileModel->index(i);
+            if (m_fileModel->data(idx, PdfFileModel::FilePathRole).toString() == filePath) {
+                m_fileModel->setData(idx, false, PdfFileModel::IsProcessingRole);
+                if (img.isNull()) {
+                    m_fileModel->setData(idx, true, PdfFileModel::IsErrorRole);
+                }
+            }
+        }
     });
+
     TaskQueueManager::instance().startTask(task);
 }
 
+void ConverterViewModel::startRenderingForIndex(const QString &filePath, int index) {
+    // Включаем индикатор загрузки только для конкретной карточки
+    QModelIndex modelIdx = m_fileModel->index(index);
+    m_fileModel->setData(modelIdx, true, PdfFileModel::IsProcessingRole);
+
+    RenderTask* task = new RenderTask(filePath);
+
+    // В лямбду передаем index захватом
+    connect(task->taskSignals(), &TaskSignals::resultReady, this, [this, index, filePath](const QImage &img){
+        // Обновляем превью конкретно по индексу
+        m_fileModel->updatePreviewByIndex(index, img);
+
+        QModelIndex modelIdx = m_fileModel->index(index);
+        m_fileModel->setData(modelIdx, false, PdfFileModel::IsProcessingRole);
+
+        if (img.isNull()) {
+            m_fileModel->setData(modelIdx, true, PdfFileModel::IsErrorRole);
+        }
+    });
+
+    TaskQueueManager::instance().startTask(task);
+}
 void ConverterViewModel::finalizeOperation(const QString &resultPath) {
     Q_UNUSED(resultPath); // Если вдруг мы решим не использовать переменную, это уберет warning
 
@@ -179,4 +239,28 @@ QString ConverterViewModel::generateUniqueOutputPath(const QString &baseName) {
                        .arg(suffix);
     }
     return fullPath;
+}
+
+
+void ConverterViewModel::sortByName(bool ascending) {
+    if (m_fileModel) {
+        m_fileModel->sortData(ascending);
+        resetStatus();
+    }
+}
+
+void ConverterViewModel::resetStatus() {
+    if (m_isProcessing) return; // Не сбрасываем, если прямо сейчас идет конвертация
+
+    m_progress = 0.0f;
+    m_isFinished = false;
+    m_statusText = "Готов к работе"; // Или "", если хочешь пустой лог
+
+    emit progressChanged();
+    emit isFinishedChanged();
+    emit statusTextChanged();
+}
+
+void ConverterViewModel::resetProcessingStatus() {
+    resetStatus();
 }

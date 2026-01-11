@@ -8,8 +8,9 @@ PreviewImageProvider::PreviewImageProvider(PdfFileModel *model)
 
 QImage PreviewImageProvider::requestImage(const QString &id, QSize *size, const QSize &requestedSize)
 {
+    QString cleanId = id.split('?').at(0);
     bool ok;
-    int index = id.toInt(&ok);
+    int index = cleanId.toInt(&ok);
 
     if (!ok || !m_model) {
         return QImage();
