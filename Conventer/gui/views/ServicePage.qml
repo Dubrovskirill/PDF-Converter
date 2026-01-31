@@ -209,8 +209,8 @@ Item {
             id: fileGrid
             Layout.fillWidth: true
             Layout.fillHeight: true
-            cellWidth: 180
-            cellHeight: 220
+            cellWidth: Style.cardWidth + 10
+            cellHeight: (Style.cardWidth * Style.ratioA4) + 70
             clip: true
 
 

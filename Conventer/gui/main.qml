@@ -4,9 +4,9 @@ import QtQuick.Controls 2.15
 import "views" // Подключаем папку с вьюшками
 
 Window {
-    width: 800
+    width: 850
     height: 600
-    minimumWidth: 800
+    minimumWidth: 850
     minimumHeight: 600
     visible: true
     title: qsTr("PDF Converter")

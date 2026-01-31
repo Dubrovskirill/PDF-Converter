@@ -16,14 +16,14 @@ Item {
 
     readonly property int visualIndex: DelegateModel.itemsIndex
 
-    width: 160
-    height: 200
+    width: Style.cardWidth
+    height: (Style.cardWidth * Style.ratioA4) + 60
 
     Rectangle {
         id: cardRoot
-        width: 160
-        height: 200
-        color: Style.bgMain
+        width: Style.cardWidth
+        height: (Style.cardWidth * Style.ratioA4) + 60
+        color: Qt.rgba(Style.primary.r, Style.primary.g, Style.primary.b, 0.15)
         radius: Style.radius
 
 
@@ -59,15 +59,18 @@ Item {
 
             Rectangle {
                 Layout.fillWidth: true
-                Layout.fillHeight: true
-                color: Style.bgLight
-                radius: 6
+                Layout.preferredHeight: width * Style.ratioA4
+                color: "#ffffff"
+                radius: 4
+                border.width: 1
+                border.color: Style.borderDefault
                 clip: true
 
                 Image {
                     anchors.fill: parent
+                    anchors.margins: 1
                     source: previewSource
-                    fillMode: Image.PreserveAspectCrop
+                    fillMode: Image.PreserveAspectFit
                     visible: status === Image.Ready && !isProcessing && !isError
                     asynchronous: true
                     cache: false

@@ -29,4 +29,8 @@ QtObject {
 
     readonly property int radius: 6                  // Единый радиус для всего
     readonly property int spacing: 10
+
+
+    readonly property double ratioA4: 1.4142
+    readonly property int cardWidth: 180
 }
